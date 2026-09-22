@@ -273,8 +273,8 @@
 <!-- 破框全屏跳杀 Canvas 画布 -->
 <canvas id="fullscreen-canvas"></canvas>
 
-<!-- 背景音乐（不可关闭，循环播放） -->
-<audio id="bg-audio" src="https://files.catbox.moe/iup720.mp3" preload="auto" loop></audio>
+<!-- 背景音乐（CDN 来源，不可关闭，循环播放） -->
+<audio id="bg-audio" src="https://cdn.jsdelivr.net/gh/appleandding/ypyp@main/Old%20Doll%20-%20Bluerra-sai.mp3" preload="auto" loop></audio>
 
 <script>
 // ==================== 44 道恐怖问答与特效配置 ====================
@@ -464,7 +464,7 @@ function playScreamerAudio(duration = 1.2, intensity = 1.0) {
   osc.stop(now + duration);
 }
 
-// 低频压迫潜音（用于静止渗血/怪脸）
+// 低频压迫潜音
 function playCreepyDrone(duration = 1.2) {
   if (!audioCtx) return;
   const now = audioCtx.currentTime;
@@ -594,7 +594,6 @@ function drawBloodOozing() {
   ctx.fillStyle = "#800000";
   ctx.fillRect(0, 0, canvas.width, 40);
 
-  // 满屏垂流血痕
   for (let x = 0; x < canvas.width; x += 18) {
     const len = 80 + Math.sin(x) * 40 + Math.random() * (canvas.height * 0.7);
     const width = 8 + Math.random() * 12;
@@ -606,7 +605,6 @@ function drawBloodOozing() {
     ctx.fill();
   }
 
-  // 溅洒在大屏各处的血斑
   for (let i = 0; i < 35; i++) {
     ctx.fillStyle = "rgba(140, 0, 0, 0.85)";
     ctx.beginPath();
@@ -632,7 +630,6 @@ function drawDenseTextFlood() {
     }
   }
 
-  // 全屏中心突出的巨大狂暴文字
   ctx.fillStyle = "#ffffff";
   ctx.font = "900 clamp(32px, 6vw, 64px) monospace";
   ctx.textAlign = "center";
@@ -641,7 +638,7 @@ function drawDenseTextFlood() {
   ctx.fillText("【 他 正 趴 在 你 头 顶 】", canvas.width / 2, canvas.height / 2);
 }
 
-// 3. 密密麻麻挤压变形扭曲面孔矩阵（全屏平铺）
+// 3. 密密麻麻挤压变形扭曲面孔矩阵
 function drawDenseDistortedFaces() {
   const { canvas, ctx } = getCanvasCtx();
   ctx.fillStyle = "#000000";
@@ -663,33 +660,28 @@ function drawDenseDistortedFaces() {
       ctx.translate(fx, fy);
       ctx.scale(scaleX, scaleY);
 
-      // 挤压灰白脸
       ctx.fillStyle = Math.random() > 0.5 ? "#b5b5b5" : "#6c7a70";
       ctx.beginPath();
       ctx.ellipse(0, 0, cellW * 0.38, cellH * 0.42, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // 空洞黑眼
       ctx.fillStyle = "#000";
       ctx.beginPath();
       ctx.ellipse(-16, -12, 10, 16, 0.1, 0, Math.PI * 2);
       ctx.ellipse(16, -12, 10, 16, -0.1, 0, Math.PI * 2);
       ctx.fill();
 
-      // 猩红凝视点
       ctx.fillStyle = "#ff0000";
       ctx.beginPath();
       ctx.arc(-16, -12, 3, 0, Math.PI * 2);
       ctx.arc(16, -12, 3, 0, Math.PI * 2);
       ctx.fill();
 
-      // 撕裂下垂大嘴
       ctx.fillStyle = "#050000";
       ctx.beginPath();
       ctx.ellipse(0, 24, 14, 30, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // 淌血
       ctx.fillStyle = "#990000";
       ctx.fillRect(-18, -4, 4, 35);
       ctx.fillRect(14, -4, 4, 35);
@@ -699,7 +691,7 @@ function drawDenseDistortedFaces() {
   }
 }
 
-// 4. 蜡质融化下垂巨口鬼脸（全屏占满）
+// 4. 蜡质融化下垂巨口鬼脸
 function drawMeltingFace() {
   const { canvas, ctx, cx, cy } = getCanvasCtx();
   ctx.fillStyle = "#040404";
@@ -716,19 +708,16 @@ function drawMeltingFace() {
   ctx.closePath();
   ctx.fill();
 
-  // 下垂肉条
   for (let i = -faceW * 0.8; i <= faceW * 0.8; i += 30) {
     ctx.fillRect(cx + i, cy + faceH * 0.7, 18, 80 + Math.random() * 100);
   }
 
-  // 倾斜融化黑洞眼
   ctx.fillStyle = "#000";
   ctx.beginPath();
   ctx.ellipse(cx - faceW * 0.4, cy - faceH * 0.2, 55, 80, 0.3, 0, Math.PI * 2);
   ctx.ellipse(cx + faceW * 0.4, cy - faceH * 0.1, 45, 90, -0.3, 0, Math.PI * 2);
   ctx.fill();
 
-  // 融化巨口
   ctx.beginPath();
   ctx.ellipse(cx, cy + faceH * 0.4, 65, 140, 0, 0, Math.PI * 2);
   ctx.fill();
@@ -786,7 +775,7 @@ function drawEyesJumpscare() {
   }
 }
 
-// 7. 全屏拍击血手印（第18题）
+// 7. 全屏拍击血手印
 function drawHandsJumpscare() {
   const { canvas, ctx } = getCanvasCtx();
   ctx.fillStyle = "rgba(10, 0, 0, 0.92)";
@@ -880,7 +869,6 @@ function drawBleedingTearsFace() {
   ctx.ellipse(cx + faceW * 0.38, cy - faceH * 0.18, faceW * 0.24, faceH * 0.24, -0.1, 0, Math.PI * 2);
   ctx.fill();
 
-  // 狂暴血泪
   ctx.fillStyle = "#aa0000";
   for(let offset of [-faceW * 0.38, faceW * 0.38]) {
     for (let i = 0; i < 10; i++) {
@@ -893,13 +881,11 @@ function drawBleedingTearsFace() {
     }
   }
 
-  // 撕裂巨口
   ctx.fillStyle = "#150000";
   ctx.beginPath();
   ctx.ellipse(cx, cy + faceH * 0.45, faceW * 0.36, faceH * 0.38, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // 两侧大血手印
   function drawHand(hx, hy) {
     ctx.fillStyle = "rgba(200, 0, 0, 0.92)";
     ctx.beginPath(); ctx.arc(hx, hy, 55, 0, Math.PI * 2); ctx.fill();
@@ -962,7 +948,6 @@ function renderQuestion() {
   });
 }
 
-// 破框全屏跳杀触发器（仅在必要时开启震动）
 function triggerFullscreenJumpscare(drawFunction, duration = 1000, hasViolentShock = false, hasScreamer = false) {
   const canvas = document.getElementById("fullscreen-canvas");
   drawFunction();
@@ -989,61 +974,49 @@ function triggerFullscreenJumpscare(drawFunction, duration = 1000, hasViolentSho
 function handleChoice(qData) {
   playClickSound();
 
-  // 基础伴随音效
   if (qData.sfx === "whisper") playWhisperSound();
   if (qData.sfx === "heartbeat") playHeartbeatSound();
   if (qData.sfx === "knock") playKnockSound();
   if (qData.sfx === "scratch") playScratchSound();
   if (qData.sfx === "tinnitus") playTinnitusSound();
 
-  // 破框全屏跳杀分发（精心分配震动与尖叫，避免脱敏）
   if (qData.jumpscareType === "blood_ooze") {
-    // 静止黏稠渗血（无震动，低频音）
     triggerFullscreenJumpscare(drawBloodOozing, 1000, false, false);
     return;
   }
   if (qData.jumpscareType === "eyes") {
-    // 凝视红眼（刺耳尖啸，无乱震）
     triggerFullscreenJumpscare(drawEyesJumpscare, 900, false, true);
     return;
   }
   if (qData.jumpscareType === "dense_text") {
-    // 密密麻麻文字（静默心理压迫，无震动）
     triggerFullscreenJumpscare(drawDenseTextFlood, 1100, false, false);
     return;
   }
   if (qData.jumpscareType === "hands_violent") {
-    // 💥 关键突发点：血手印拍屏（暴烈震动 + 尖啸）
     triggerFullscreenJumpscare(drawHandsJumpscare, 950, true, true);
     return;
   }
   if (qData.jumpscareType === "dense_faces") {
-    // 密集怪脸矩阵（全屏静止凝视，无震动）
     triggerFullscreenJumpscare(drawDenseDistortedFaces, 1200, false, false);
     return;
   }
   if (qData.jumpscareType === "melting_face") {
-    // 蜡质融化鬼脸（深层心理不适，无震动）
     triggerFullscreenJumpscare(drawMeltingFace, 1100, false, false);
     return;
   }
   if (qData.jumpscareType === "smile") {
-    // 裂嘴诡笑（静默突现）
     triggerFullscreenJumpscare(drawSmileJumpscare, 1000, false, false);
     return;
   }
   if (qData.jumpscareType === "dense_text_red") {
-    // 密集红字（无震动）
     triggerFullscreenJumpscare(drawDenseTextRed, 900, false, false);
     return;
   }
   if (qData.jumpscareType === "signallost") {
-    // 信号中断（电声尖啸）
     triggerFullscreenJumpscare(drawSignalLostJumpscare, 1200, false, true);
     return;
   }
   if (qData.jumpscareType === "look_behind") {
-    // 💥💥 终极高潮：第40题全景回头 + 满脸血泪鬼脸大跳杀！
     executeBehindYouJumpscare();
     return;
   }
@@ -1068,18 +1041,17 @@ function executeBehindYouJumpscare() {
   const canvas = document.getElementById("fullscreen-canvas");
 
   panView.style.display = "block";
-  panorama.style.transform = "translateX(25vw)"; // 缓缓向左看
+  panorama.style.transform = "translateX(25vw)";
 
   setTimeout(() => {
-    panorama.style.transform = "translateX(-25vw)"; // 缓缓向右看
+    panorama.style.transform = "translateX(-25vw)";
   }, 900);
 
   setTimeout(() => {
-    panorama.style.transform = "translateX(0vw)"; // 猛地转回正后方！
+    panorama.style.transform = "translateX(0vw)";
   }, 1800);
 
   setTimeout(() => {
-    // 💥 全场最强爆发：满屏血泪鬼脸 + 全屏剧烈暴颤 + 极度尖啸！
     drawBleedingTearsFace();
     canvas.style.display = "block";
     document.body.classList.add("violent-shock");
