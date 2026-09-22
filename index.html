@@ -3,63 +3,70 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SYSTEM_DIAGNOSIS_44_FULLSCREEN.EXE</title>
+<title>SYSTEM_DIAGNOSIS_44_DARK.EXE</title>
 <style>
   :root {
-    --blood-red: #8b0000;
-    --neon-red: #ff1a1a;
-    --term-green: #00ff66;
-    --bg-dark: #030303;
+    --blood-red: #5a0000;
+    --neon-red: #cc0000;
+    --term-green: #00aa44;
+    --bg-dark: #020202;
+    --vignette-size: 70%;
+    --monitor-dim: 1;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: "Courier New", Consolas, "PingFang SC", "Microsoft YaHei", monospace; }
   body {
     background-color: var(--bg-dark);
-    color: #bbb;
+    color: #888;
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
+    transition: background-color 1s ease;
   }
 
-  /* CRT 显示器扫描线与暗角滤镜 */
+  /* 动态渐进全屏黑雾与暗角扫描线 */
   .crt-overlay {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
-    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.45) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05));
-    background-size: 100% 3px, 6px 100%;
+    background: radial-gradient(circle at 50% 50%, transparent var(--vignette-size), rgba(0, 0, 0, 0.98) 100%),
+                linear-gradient(rgba(10, 10, 10, 0) 50%, rgba(0, 0, 0, 0.6) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 0, 0, 0.05), rgba(255, 0, 0, 0.02));
+    background-size: 100% 100%, 100% 3px, 6px 100%;
     pointer-events: none;
     z-index: 999;
+    transition: background 0.8s ease;
   }
 
-  /* 模拟复古电脑外壳（居中显示） */
+  /* 居中复古电脑外壳（极暗黑质感） */
   .monitor-frame {
     width: 940px;
     max-width: 92vw;
     height: 640px;
     max-height: 90vh;
-    background: #111;
-    border: 16px solid #202020;
+    background: #080808;
+    border: 16px solid #141414;
     border-radius: 20px;
-    box-shadow: 0 0 80px rgba(0,0,0,0.98), inset 0 0 100px rgba(0,0,0,0.9);
+    box-shadow: 0 0 100px rgba(0,0,0,1), inset 0 0 140px rgba(0,0,0,0.98);
     position: relative;
     padding: 30px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    transition: border-color 0.4s;
+    transition: border-color 0.6s, opacity 0.2s;
+    filter: brightness(var(--monitor-dim));
     z-index: 10;
   }
 
   /* 标题栏与系统信息 */
   .system-header {
-    border-bottom: 1px dashed #333;
+    border-bottom: 1px dashed #202020;
     padding-bottom: 10px;
     margin-bottom: 20px;
     display: flex;
     justify-content: space-between;
     font-size: 13px;
-    color: #666;
+    color: #444;
   }
 
   .status-light {
@@ -93,10 +100,10 @@
 
   .question-box {
     font-size: 21px;
-    line-height: 1.6;
-    color: #e0e0e0;
+    line-height: 1.65;
+    color: #b0b0b0;
     min-height: 110px;
-    text-shadow: 0 0 5px rgba(255,255,255,0.2);
+    text-shadow: 0 0 3px rgba(0,0,0,0.8);
   }
 
   .answers-grid {
@@ -107,29 +114,30 @@
   }
 
   .btn-choice {
-    background: rgba(20, 20, 20, 0.88);
-    border: 1px solid #444;
-    color: #aaa;
-    padding: 15px 20px;
+    background: rgba(14, 14, 14, 0.95);
+    border: 1px solid #282828;
+    color: #888;
+    padding: 16px 20px;
     font-size: 15px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.25s ease;
     text-align: left;
     outline: none;
+    border-radius: 4px;
   }
   .btn-choice:hover {
-    background: #2a0000;
+    background: #180000;
     border-color: var(--neon-red);
-    color: #fff;
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
-    transform: scale(1.02);
+    color: #ccc;
+    box-shadow: 0 0 15px rgba(180, 0, 0, 0.35);
+    transform: scale(1.015);
   }
 
   /* 免责声明弹窗 */
   #disclaimer-modal {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(0,0,0,0.97);
+    background: rgba(0,0,0,0.99);
     z-index: 99999;
     display: flex;
     justify-content: center;
@@ -139,10 +147,10 @@
   .modal-box {
     width: 660px;
     max-width: 90vw;
-    border: 2px solid var(--blood-red);
-    background: #0d0d0d;
+    border: 1px solid #4a0000;
+    background: #050505;
     padding: 35px;
-    box-shadow: 0 0 60px rgba(255,0,0,0.4);
+    box-shadow: 0 0 80px rgba(70,0,0,0.3);
     line-height: 1.8;
   }
 
@@ -152,28 +160,28 @@
     font-size: 20px;
     text-align: center;
     letter-spacing: 4px;
-    border-bottom: 1px solid #300;
+    border-bottom: 1px solid #200;
     padding-bottom: 10px;
   }
 
-  .modal-box p { font-size: 14px; color: #aaa; margin-bottom: 12px; }
-  .modal-box .warning-item { color: #ff5555; font-weight: bold; }
+  .modal-box p { font-size: 14px; color: #888; margin-bottom: 12px; }
+  .modal-box .warning-item { color: #cc2222; font-weight: bold; }
 
   .accept-btn {
     width: 100%;
     margin-top: 20px;
     padding: 14px;
-    background: var(--blood-red);
+    background: #4a0000;
     border: none;
-    color: #fff;
+    color: #ccc;
     font-size: 16px;
     cursor: pointer;
     letter-spacing: 3px;
     transition: background 0.3s;
   }
-  .accept-btn:hover { background: var(--neon-red); box-shadow: 0 0 25px var(--neon-red); }
+  .accept-btn:hover { background: #800000; box-shadow: 0 0 25px rgba(200,0,0,0.4); color: #fff; }
 
-  /* ==================== 破框全屏跳杀层 (FIXED FULLSCREEN) ==================== */
+  /* 破框全屏跳杀层 */
   #fullscreen-canvas {
     position: fixed;
     top: 0; left: 0;
@@ -183,7 +191,7 @@
     pointer-events: none;
   }
 
-  /* 全屏全景回头视角 */
+  /* 破框全景回头视角 */
   #fullscreen-pan-view {
     position: fixed;
     top: 0; left: 0;
@@ -199,8 +207,8 @@
     position: absolute;
     left: -100vw;
     display: flex;
-    background: radial-gradient(circle at 50% 50%, #151515 10%, #010101 90%);
-    transition: transform 0.9s ease-in-out;
+    background: radial-gradient(circle at 50% 50%, #0d0d0d 10%, #000 90%);
+    transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .room-scene {
     width: 100vw;
@@ -208,20 +216,19 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #333;
+    color: #222;
     font-size: 24px;
     letter-spacing: 3px;
-    border-right: 1px solid #111;
+    border-right: 1px solid #080808;
   }
 
-  /* 仅在最关键跳杀时使用的全屏暴烈震颤 */
   body.violent-shock {
     animation: fullScreenViolent 0.05s infinite;
   }
   @keyframes fullScreenViolent {
-    0% { transform: translate(12px, -10px) scale(1.03); filter: invert(0.9) contrast(3); }
-    50% { transform: translate(-14px, 12px) scale(0.98); filter: hue-rotate(180deg) saturate(2); }
-    100% { transform: translate(8px, 6px) scale(1.02); }
+    0% { transform: translate(10px, -8px) scale(1.02); filter: invert(0.95) contrast(3); }
+    50% { transform: translate(-12px, 10px) scale(0.99); filter: hue-rotate(180deg) saturate(2); }
+    100% { transform: translate(6px, 5px) scale(1.01); }
   }
 
   @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
@@ -229,14 +236,14 @@
 </head>
 <body>
 
-<div class="crt-overlay"></div>
+<div class="crt-overlay" id="crt-overlay"></div>
 
 <!-- ⚠️ 免责声明弹窗 -->
 <div id="disclaimer-modal">
   <div class="modal-box">
     <h2>⚠️ 免责声明与极度恐怖警示</h2>
-    <p class="warning-item">【全屏破框霸屏 & 极端心理压迫警告】</p>
-    <p>本测试包含：<strong>全屏幕突破边界的流血、密密麻麻扭曲怪脸、深渊文字吞噬、不可关闭循环背景音乐、突发高分贝刺耳跳杀</strong>。</p>
+    <p class="warning-item">【全屏暗黑深渊突脸 & 心理极端压迫警告】</p>
+    <p>本测试包含：<strong>暗黑深渊恶灵浮现、密集分叉血丝网络、暗红黏稠拉丝流血、文字潮水吞噬、不可关闭循环背景音乐、突发高分贝刺耳跳杀</strong>。</p>
     <p>• 患有<strong>心脏病、高血压、严重焦虑症、光敏性癫痫</strong>或其他精神易激者，请<strong>立即关闭网页退出</strong>。</p>
     <p>• 未满 18 周岁未成年人禁止体验。</p>
     <p>• 进入后<strong>背景音乐将全天候锁定循环播放且无法手动关闭</strong>，请调节适当耳机音量。</p>
@@ -261,7 +268,7 @@
   </div>
 </div>
 
-<!-- 破框全屏全景回头层 -->
+<!-- 破框全景回头层 -->
 <div id="fullscreen-pan-view">
   <div class="room-panorama" id="panorama">
     <div class="room-scene">← 房间左侧（黑漆漆的窗帘）</div>
@@ -273,55 +280,55 @@
 <!-- 破框全屏跳杀 Canvas 画布 -->
 <canvas id="fullscreen-canvas"></canvas>
 
-<!-- 背景音乐（CDN 来源，不可关闭，循环播放） -->
+<!-- 背景音乐（不可关闭，循环播放） -->
 <audio id="bg-audio" src="https://cdn.jsdelivr.net/gh/appleandding/ypyp@main/Old%20Doll%20-%20Bluerra-sai.mp3" preload="auto" loop></audio>
 
 <script>
-// ==================== 44 道恐怖问答与特效配置 ====================
+// ==================== 44 道伪装心理问答 ====================
 const QUESTIONS = [
   { q: "现在……你确定是一个人在房间里吗？", ops: ["是的，只有我", "我不确定..."] },
   { q: "你房间的门现在关严实了吗？锁舌扣上了吗？", ops: ["关好了", "好像留了一条缝"] },
   { q: "你还记得上一次听到门外有脚步声是什么时候吗？", ops: ["几分钟前", "很久以前，或者没有"] },
   { q: "请别低头看：你床底下现在塞满了杂物，还是留着空隙？", ops: ["塞满了东西", "底下是空的，能藏人"] },
   
-  // ⚠️ 第 5 题：【全屏静默渗血垂滴】（破框全屏，黏稠流淌，无震动）
+  // ⚠️ 第 5 题：【暗黑深渊拉丝流血渗出】
   { 
-    q: "你面前的玻璃上……是不是有暗红色的液体正在从顶部渗出来？", 
-    ops: ["拉紧窗帘", "没拉，外面一片漆黑"], 
+    q: "你窗户的玻璃平时有水汽凝结的习惯吗？", 
+    ops: ["偶尔会有", "从来没有"], 
     jumpscareType: "blood_ooze" 
   },
   
   { q: "你衣柜的门平时会自动弹开一点点吗？", ops: ["偶尔会", "从来不会"] },
 
-  // ⚠️ 第 7 题：【全屏红眼深渊凝视】（突发电声尖啸，轻微闪烁）
+  // ⚠️ 第 7 题：【深渊全暗血丝充血恶魔眼眸】
   {
-    q: "仔细看你的屏幕边缘……你确定黑暗里没有眼睛在死死瞪着你？",
-    ops: ["我看不到眼睛", "别说了，我好害怕"],
+    q: "你有没有觉得，显示器下方的边缘比平时看起来更暗一点？",
+    ops: ["好像是暗了一点", "完全没感觉"],
     jumpscareType: "eyes"
   },
 
   { q: "你现在听到的环境音，真的完全来自电脑扬声器吗？", ops: ["是耳机里的声音", "好像房间角落也有杂音"] },
-  { q: "你的余光里，房间右上角的天花板是不是比其他地方更暗？", ops: ["别说了...", "我没敢往上看"] },
-  { q: "【听觉测试】你有听到耳边极轻极轻的呼气声吗？", ops: ["听到了！", "没有声音"], sfx: "whisper" },
+  { q: "你的余光里，房间右上角的天花板是不是比其他地方更暗？", ops: ["不要吓我...", "我没敢往上看"] },
+  { q: "听一下……你有听到耳边非常轻微的呼气声吗？", ops: ["好像听到了", "没有声音"], sfx: "whisper" },
 
-  // ⚠️ 第 11 题：【密密麻麻文字全屏吞噬】（静默压迫，无震动）
+  // ⚠️ 第 11 题：【密密麻麻文字逐行潮水吞噬并在屏幕停留】
   {
-    q: "如果现在整个屏幕被密密麻麻的‘他在看你’完全吞噬……",
-    ops: ["不要这样！", "我快疯了"],
-    jumpscareType: "dense_text"
+    q: "你还记得你今晚最后一次查看门锁的具体时间吗？",
+    ops: ["大概半小时前", "记不清了"],
+    jumpscareType: "dense_text_progressive"
   },
 
   { q: "如果现在有人在你耳边很轻地吹一口气，你会？", ops: ["猛回头", "浑身僵硬不敢动"] },
   { q: "你现在脚底踩在地板上，还是悬在半空中？", ops: ["踩在地上", "缩在椅子/床上"] },
-  { q: "你确定你身后的影子，动作和你完全同步吗？", ops: ["不要吓我", "当然同步"], sfx: "heartbeat" },
+  { q: "你确定你身后的影子，动作和你完全同步吗？", ops: ["不要胡说", "当然同步"], sfx: "heartbeat" },
   { q: "平时睡觉时，你习惯把脸朝向墙壁，还是朝向空荡荡的房间？", ops: ["朝向墙壁", "朝向房间外侧"] },
   { q: "如果镜子里的倒影比你慢半秒钟眨眼，你能发现吗？", ops: ["能发现", "不会注意到"] },
   { q: "你身后的门锁刚才是不是发出了一声非常轻微的‘咔哒’声？", ops: ["你听错了", "我好像也听到了..."], sfx: "knock" },
 
-  // ⚠️ 第 18 题：【猝不及防！血手印暴击拍屏】（💥 触发全屏暴烈震颤 + 爆破撞击）
+  // ⚠️ 第 18 题：【暗黑带血丝拖拽血手印拍屏】（💥 触发全屏暴颤）
   {
-    q: "如果下一秒，有巨大血手印直接重重拍在你的屏幕玻璃上……",
-    ops: ["不可能发生", "快停下来！"],
+    q: "你刚才余光里是不是看到玻璃上有东西晃了一下？",
+    ops: ["好像是有东西...", "看花眼了吧"],
     jumpscareType: "hands_violent"
   },
 
@@ -329,50 +336,50 @@ const QUESTIONS = [
   { q: "请回想一下：几秒钟之前，你眼角余光是不是闪过了一个黑影？", ops: ["是幻觉吧...", "绝对没有！"] },
   { q: "如果有人正贴着你的床底木板向上听你的心跳，你怎么办？", ops: ["立刻跳起来", "闭上眼睛装作不知道"], sfx: "heartbeat" },
 
-  // ⚠️ 第 22 题：【全屏密密麻麻挤压变形怪脸矩阵】（无震动，压迫静止凝视）
+  // ⚠️ 第 22 题：【深渊阴影怪诞挤压怪脸群（血丝缠绕）】
   {
-    q: "【视觉污染】整个视野里挤满了数十张被压扁抽搐的面孔死盯着你……",
-    ops: ["啊啊啊啊！", "救命！！"],
+    q: "你平时独自睡觉时，会把被子拉到盖住脖子吗？",
+    ops: ["会盖住脖子", "露在外面"],
     jumpscareType: "dense_faces"
   },
 
-  { q: "【门外异响】嘘……听，门外是不是有指甲在抠门？", ops: ["我听到了！", "没有声音"], sfx: "scratch" },
+  { q: "嘘……听，门外走廊是不是有指甲刮擦的声音？", ops: ["我听到了！", "没有声音"], sfx: "scratch" },
   { q: "你确定你刚才锁门时，锁芯真的转到底了吗？", ops: ["我确定锁了", "我记不清了..."] },
   
-  // ⚠️ 第 25 题：【蜡质融化下垂巨口鬼脸】（深层心理不适，无震动）
+  // ⚠️ 第 25 题：【深渊暗灰融化裂嘴鬼面】
   { 
-    q: "你衣柜深处那张像蜡一样融化的脸，正在朝你笑呢……", 
-    ops: ["不要看衣柜！", "快关上门！"], 
+    q: "你衣柜里的衣服，平时挂得整齐吗？", 
+    ops: ["挺整齐的", "塞得很满很乱"], 
     jumpscareType: "melting_face" 
   },
 
-  { q: "你手机最后一条收到的未读消息，会不会是一张你现在的背影照片？", ops: ["不要说这种话", "我没看手机"] },
-  { q: "你的房间窗户外面……如果是高楼，你觉得有人能贴在玻璃上看你吗？", ops: ["绝对不可能", "窗外有声音..."] },
+  { q: "你手机最后一条收到的未读消息，发件人是谁？", ops: ["朋友/家人", "陌生号码/没看手机"] },
+  { q: "你房间窗户外面……如果是高楼，平时能听到风声吗？", ops: ["风声很大", "外面很安静"] },
 
-  // ⚠️ 第 28 题：【深渊裂嘴诡笑】（极暗环境突现笑容）
+  // ⚠️ 第 28 题：【纯黑深渊隐现裂嘴诡笑】
   {
-    q: "如果整个屏幕映出一张不是你的裂嘴鬼笑……",
-    ops: ["别吓我！", "立刻关掉显示器！"],
+    q: "看看屏幕里你自己的反光倒影，你的眉毛刚才动了吗？",
+    ops: ["没有动", "我不敢看倒影"],
     jumpscareType: "smile"
   },
 
   { q: "你有没有感觉……有冰凉的手指刚刚碰到了你的脚踝？", ops: ["没有！", "我的脚缩起来了"] },
   { q: "你的后颈现在是不是越来越重，像是有下巴搁在你的肩膀上？", ops: ["好酸，好重...", "心理作用而已"], sfx: "tinnitus" },
 
-  // ⚠️ 第 31 题：【密密麻麻血字狂暴覆盖】
+  // ⚠️ 第 31 题：【密密麻麻深暗血字逐层压制停留】
   {
-    q: "【精神崩溃】‘逃不掉了逃不掉了逃不掉了’……你听见它们在念了吗？",
-    ops: ["快让我退出！", "我听不见！"],
-    jumpscareType: "dense_text_red"
+    q: "你房间的插座平时会发出细微的电流蜂鸣声吗？",
+    ops: ["偶尔会响", "完全没有声音"],
+    jumpscareType: "dense_text_red_progressive"
   },
 
-  { q: "如果门外现在响起了剧烈的砸门声，你敢去猫眼看一眼吗？", ops: ["打死也不看", "直接报警"], sfx: "knock" },
+  { q: "如果门外现在响起了剧烈的敲门声，你敢去猫眼看一眼吗？", ops: ["打死也不看", "直接报警"], sfx: "knock" },
   { q: "你确定你现在是在自己的房间，而不是在停尸房的梦境里吗？", ops: ["别胡说八道", "我开始怀疑了"] },
 
-  // ⚠️ 第 34 题：【全屏信号中断黑屏 + 恶灵站在跟前】
+  // ⚠️ 第 34 题：【全屏黑屏信号丢失】
   {
-    q: "请闭上眼睛3秒钟。你敢保证睁开眼时它没有站在你跟前吗？",
-    ops: ["我不敢闭眼...", "我敢试！"],
+    q: "你确定你今晚喝的水里，没有被放进别的东西吗？",
+    ops: ["绝对没有", "我没喝水"],
     jumpscareType: "signallost"
   },
 
@@ -382,15 +389,15 @@ const QUESTIONS = [
   { q: "如果我现在告诉你，房间里的摄像头已经被入侵了，你信吗？", ops: ["我不信", "我把摄像头贴住了"] },
   { q: "距离这个测试结束还有最后几道题，你觉得你能平安答完吗？", ops: ["能", "我想退出了"] },
 
-  // ⚠️ 第 40 题：【终极全屏全景回头 + 满屏血泪鬼脸 + 血手印】（💥💥 全场最强暴烈震颤跳杀！）
+  // ⚠️ 第 40 题：【终极大高潮】全景回头 + 纯黑深渊血丝拉丝恶灵大跳杀！
   {
-    q: "【最后确认】请别回头。你 100% 确定你的后背上，现在没有趴着一个人正贴着你的脖子喘气吗？",
-    ops: ["我不确定...（校准环顾周围）", "我背后绝对没人！（回头看）"],
+    q: "你确定你背后现在没有人趴着吗？",
+    ops: ["我不确定...（环顾周围）", "我背后绝对没人！（回头看）"],
     jumpscareType: "look_behind"
   },
 
-  { q: "【劫后余生】刚才……你看清楚趴在你背后的东西了吗？", ops: ["看清楚了，太可怕了", "我什么都没看到"] },
-  { q: "它的血眼泪滴在你身上了吗？", ops: ["好像滴在屏幕上了", "没有"] },
+  { q: "刚才……你看清楚趴在你背后的东西了吗？", ops: ["看清楚了，太可怕了", "我什么都没看到"] },
+  { q: "它的血眼泪拉着丝滴在你身上了吗？", ops: ["好像滴在屏幕上了", "没有"] },
   { q: "你现在的心率是不是已经超过了 140 次/分？", ops: ["心跳得极快", "快被吓疯了"], sfx: "heartbeat" },
   { q: "【第44题 · 终章】它已经记住你的脸了。今天晚上，你确定你睡得着吗？", ops: ["晚安……如果我还能醒来的话", "立刻开全屋大灯！"] }
 ];
@@ -404,7 +411,7 @@ bgAudio.addEventListener("ended", () => {
   bgAudio.play();
 });
 
-// ==================== Web Audio 合成音效 ====================
+// ==================== Web Audio 拟真音效系统 ====================
 function initAudio() {
   if (!audioCtx) {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -419,9 +426,9 @@ function playClickSound() {
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.type = "triangle";
-  osc.frequency.setValueAtTime(260 + Math.random() * 150, audioCtx.currentTime);
+  osc.frequency.setValueAtTime(220 + Math.random() * 100, audioCtx.currentTime);
   osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.08);
-  gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
   osc.connect(gain);
   gain.connect(audioCtx.destination);
@@ -429,7 +436,6 @@ function playClickSound() {
   osc.stop(audioCtx.currentTime + 0.08);
 }
 
-// 突脸高分贝尖叫与撕裂音效
 function playScreamerAudio(duration = 1.2, intensity = 1.0) {
   if (!audioCtx) return;
   const now = audioCtx.currentTime;
@@ -451,9 +457,9 @@ function playScreamerAudio(duration = 1.2, intensity = 1.0) {
   const osc = audioCtx.createOscillator();
   const oscGain = audioCtx.createGain();
   osc.type = "sawtooth";
-  osc.frequency.setValueAtTime(900, now);
-  osc.frequency.linearRampToValueAtTime(3600, now + 0.2);
-  osc.frequency.linearRampToValueAtTime(150, now + duration);
+  osc.frequency.setValueAtTime(800, now);
+  osc.frequency.linearRampToValueAtTime(3400, now + 0.2);
+  osc.frequency.linearRampToValueAtTime(140, now + duration);
 
   oscGain.gain.setValueAtTime(0.9 * intensity, now);
   oscGain.gain.exponentialRampToValueAtTime(0.01, now + duration);
@@ -464,16 +470,15 @@ function playScreamerAudio(duration = 1.2, intensity = 1.0) {
   osc.stop(now + duration);
 }
 
-// 低频压迫潜音
 function playCreepyDrone(duration = 1.2) {
   if (!audioCtx) return;
   const now = audioCtx.currentTime;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.type = "sawtooth";
-  osc.frequency.setValueAtTime(55, now);
-  osc.frequency.linearRampToValueAtTime(35, now + duration);
-  gain.gain.setValueAtTime(0.5, now);
+  osc.frequency.setValueAtTime(50, now);
+  osc.frequency.linearRampToValueAtTime(30, now + duration);
+  gain.gain.setValueAtTime(0.4, now);
   gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
   osc.connect(gain);
   gain.connect(audioCtx.destination);
@@ -488,9 +493,9 @@ function playKnockSound() {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = "sine";
-    osc.frequency.setValueAtTime(100, t);
+    osc.frequency.setValueAtTime(95, t);
     osc.frequency.exponentialRampToValueAtTime(30, t + 0.1);
-    gain.gain.setValueAtTime(0.8, t);
+    gain.gain.setValueAtTime(0.7, t);
     gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
     osc.connect(gain);
     gain.connect(audioCtx.destination);
@@ -506,8 +511,8 @@ function playScratchSound() {
   const gain = audioCtx.createGain();
   osc.type = "square";
   osc.frequency.setValueAtTime(1200, now);
-  osc.frequency.linearRampToValueAtTime(3500, now + 0.4);
-  gain.gain.setValueAtTime(0.3, now);
+  osc.frequency.linearRampToValueAtTime(3400, now + 0.4);
+  gain.gain.setValueAtTime(0.25, now);
   gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
   osc.connect(gain);
   gain.connect(audioCtx.destination);
@@ -524,7 +529,7 @@ function playHeartbeatSound() {
     osc.type = "sine";
     osc.frequency.setValueAtTime(65, now + delay);
     osc.frequency.exponentialRampToValueAtTime(25, now + delay + 0.12);
-    gain.gain.setValueAtTime(0.9, now + delay);
+    gain.gain.setValueAtTime(0.85, now + delay);
     gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.12);
     osc.connect(gain);
     gain.connect(audioCtx.destination);
@@ -541,7 +546,7 @@ function playTinnitusSound() {
   osc.type = "sine";
   osc.frequency.setValueAtTime(4200, now);
   gain.gain.setValueAtTime(0.01, now);
-  gain.gain.linearRampToValueAtTime(0.25, now + 0.5);
+  gain.gain.linearRampToValueAtTime(0.22, now + 0.5);
   gain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
   osc.connect(gain);
   gain.connect(audioCtx.destination);
@@ -567,7 +572,7 @@ function playWhisperSound() {
 
   const gain = audioCtx.createGain();
   gain.gain.setValueAtTime(0.01, now);
-  gain.gain.linearRampToValueAtTime(0.4, now + 0.5);
+  gain.gain.linearRampToValueAtTime(0.35, now + 0.5);
   gain.gain.exponentialRampToValueAtTime(0.01, now + 1.5);
 
   noise.connect(filter);
@@ -576,7 +581,7 @@ function playWhisperSound() {
   noise.start(now);
 }
 
-// ==================== 破框全屏 Canvas 绘制矩阵 ====================
+// ==================== 🩸 纯黑深渊 · 密生血丝与暗黑恶灵渲染引擎 ====================
 function getCanvasCtx() {
   const canvas = document.getElementById("fullscreen-canvas");
   const ctx = canvas.getContext("2d");
@@ -585,319 +590,491 @@ function getCanvasCtx() {
   return { canvas, ctx, cx: canvas.width / 2, cy: canvas.height / 2 };
 }
 
-// 1. 全屏静止黏稠渗血（破框占满整个屏幕）
-function drawBloodOozing() {
-  const { canvas, ctx } = getCanvasCtx();
-  ctx.fillStyle = "rgba(8, 0, 0, 0.94)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+// 递归生成极度逼真的多级分叉血丝
+function drawBranchingVein(ctx, x, y, length, angle, depth, color = '#aa0000') {
+  if (depth <= 0 || length < 3) return;
+  const endX = x + Math.cos(angle) * length;
+  const endY = y + Math.sin(angle) * length;
 
-  ctx.fillStyle = "#800000";
-  ctx.fillRect(0, 0, canvas.width, 40);
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(endX, endY);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = Math.max(0.6, depth * 0.7);
+  ctx.stroke();
 
-  for (let x = 0; x < canvas.width; x += 18) {
-    const len = 80 + Math.sin(x) * 40 + Math.random() * (canvas.height * 0.7);
-    const width = 8 + Math.random() * 12;
-    ctx.fillStyle = Math.random() > 0.3 ? "#8b0000" : "#ff0000";
-    ctx.fillRect(x, 0, width, len);
-
-    ctx.beginPath();
-    ctx.arc(x + width / 2, len, width * 0.9, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  for (let i = 0; i < 35; i++) {
-    ctx.fillStyle = "rgba(140, 0, 0, 0.85)";
-    ctx.beginPath();
-    ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, 20 + Math.random() * 45, 0, Math.PI * 2);
-    ctx.fill();
+  const branches = Math.random() > 0.25 ? 2 : 1;
+  for (let i = 0; i < branches; i++) {
+    const newAngle = angle + (Math.random() - 0.5) * 0.95;
+    const newLen = length * (0.62 + Math.random() * 0.25);
+    drawBranchingVein(ctx, endX, endY, newLen, newAngle, depth - 1, color);
   }
 }
 
-// 2. 密密麻麻全屏文字吞噬
-function drawDenseTextFlood() {
-  const { canvas, ctx } = getCanvasCtx();
-  ctx.fillStyle = "#030000";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+// 全屏边缘向内疯狂蔓延的血丝网络
+function drawScreenCreepingVeins(ctx, width, height) {
+  // 从四角向内狂暴生长
+  const corners = [
+    { x: 0, y: 0, a: Math.PI / 4 },
+    { x: width, y: 0, a: (3 * Math.PI) / 4 },
+    { x: 0, y: height, a: -Math.PI / 4 },
+    { x: width, y: height, a: (-3 * Math.PI) / 4 }
+  ];
 
-  const texts = ["他在你背后", "回头", "死", "别看他", "他在看着你", "逃不掉了", "抓到你了", "别眨眼", "床底有人", "嘻嘻嘻"];
-  
-  ctx.font = "bold 16px monospace";
-  for (let y = 20; y < canvas.height; y += 24) {
-    for (let x = 0; x < canvas.width; x += 105) {
-      ctx.fillStyle = Math.random() > 0.4 ? "#ff1a1a" : (Math.random() > 0.5 ? "#8b0000" : "#ffffff");
-      const word = texts[Math.floor(Math.random() * texts.length)];
-      ctx.fillText(word, x + (Math.random() * 8 - 4), y);
+  corners.forEach(c => {
+    for (let i = 0; i < 4; i++) {
+      drawBranchingVein(ctx, c.x, c.y, 110 + Math.random() * 80, c.a + (Math.random() - 0.5) * 0.5, 4, "#8b0000");
     }
-  }
+  });
 
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "900 clamp(32px, 6vw, 64px) monospace";
-  ctx.textAlign = "center";
-  ctx.shadowColor = "#ff0000";
-  ctx.shadowBlur = 25;
-  ctx.fillText("【 他 正 趴 在 你 头 顶 】", canvas.width / 2, canvas.height / 2);
+  // 四周边缘血丝侵染
+  for (let x = 0; x < width; x += 120) {
+    drawBranchingVein(ctx, x, 0, 70 + Math.random() * 60, Math.PI / 2 + (Math.random() - 0.5) * 0.4, 3, "#700000");
+    drawBranchingVein(ctx, x, height, 70 + Math.random() * 60, -Math.PI / 2 + (Math.random() - 0.5) * 0.4, 3, "#700000");
+  }
 }
 
-// 3. 密密麻麻挤压变形扭曲面孔矩阵
-function drawDenseDistortedFaces() {
+// 绘制暗红黏稠拉丝流体血柱
+function drawDarkViscousBloodTendril(ctx, startX, startY, length, baseWidth, dropRadius) {
+  const endY = startY + length;
+  const midY = startY + length * 0.65;
+  const thinWidth = Math.max(1.2, baseWidth * 0.16);
+
+  // 极深暗红底色
+  const grad = ctx.createLinearGradient(startX, startY, startX, endY);
+  grad.addColorStop(0, "#200000");
+  grad.addColorStop(0.5, "#550000");
+  grad.addColorStop(0.85, "#800000");
+  grad.addColorStop(1, "#aa0000");
+
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(startX - baseWidth * 0.5, startY);
+  ctx.bezierCurveTo(startX - baseWidth * 0.3, startY + length * 0.3, startX - thinWidth, midY, startX - dropRadius * 0.8, endY - dropRadius);
+  ctx.arc(startX, endY, dropRadius, Math.PI * 0.8, Math.PI * 0.2, true);
+  ctx.bezierCurveTo(startX + thinWidth, midY, startX + baseWidth * 0.3, startY + length * 0.3, startX + baseWidth * 0.5, startY);
+  ctx.closePath();
+  ctx.fill();
+
+  // 伴随的微细血丝拉扯
+  drawBranchingVein(ctx, startX, startY + 10, length * 0.4, Math.PI / 2 + (Math.random() - 0.5) * 0.3, 3, "#aa0000");
+}
+
+// 1. 全屏深渊暗黑黏稠流血（第5题）
+function drawBloodOozing() {
   const { canvas, ctx } = getCanvasCtx();
   ctx.fillStyle = "#000000";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  const rows = Math.ceil(canvas.height / 140);
-  const cols = Math.ceil(canvas.width / 160);
-  const cellW = canvas.width / cols;
-  const cellH = canvas.height / rows;
+  drawScreenCreepingVeins(ctx, canvas.width, canvas.height);
 
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const fx = c * cellW + cellW / 2 + (Math.random() * 20 - 10);
-      const fy = r * cellH + cellH / 2 + (Math.random() * 20 - 10);
-      const scaleX = 0.7 + Math.random() * 0.5;
-      const scaleY = 1.1 + Math.random() * 0.7;
+  // 顶部暗血渗透
+  const topGrad = ctx.createLinearGradient(0, 0, 0, 90);
+  topGrad.addColorStop(0, "#300000");
+  topGrad.addColorStop(0.7, "#150000");
+  topGrad.addColorStop(1, "transparent");
+  ctx.fillStyle = topGrad;
+  ctx.fillRect(0, 0, canvas.width, 90);
 
-      ctx.save();
-      ctx.translate(fx, fy);
-      ctx.scale(scaleX, scaleY);
-
-      ctx.fillStyle = Math.random() > 0.5 ? "#b5b5b5" : "#6c7a70";
-      ctx.beginPath();
-      ctx.ellipse(0, 0, cellW * 0.38, cellH * 0.42, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = "#000";
-      ctx.beginPath();
-      ctx.ellipse(-16, -12, 10, 16, 0.1, 0, Math.PI * 2);
-      ctx.ellipse(16, -12, 10, 16, -0.1, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = "#ff0000";
-      ctx.beginPath();
-      ctx.arc(-16, -12, 3, 0, Math.PI * 2);
-      ctx.arc(16, -12, 3, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = "#050000";
-      ctx.beginPath();
-      ctx.ellipse(0, 24, 14, 30, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = "#990000";
-      ctx.fillRect(-18, -4, 4, 35);
-      ctx.fillRect(14, -4, 4, 35);
-
-      ctx.restore();
-    }
+  for (let x = 20; x < canvas.width; x += 30) {
+    const len = 130 + Math.sin(x * 0.04) * 60 + Math.random() * (canvas.height * 0.65);
+    const baseW = 14 + Math.random() * 16;
+    const dropR = 7 + Math.random() * 11;
+    drawDarkViscousBloodTendril(ctx, x, 0, len, baseW, dropR);
   }
 }
 
-// 4. 蜡质融化下垂巨口鬼脸
-function drawMeltingFace() {
-  const { canvas, ctx, cx, cy } = getCanvasCtx();
-  ctx.fillStyle = "#040404";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  const faceW = Math.min(canvas.width * 0.4, 300);
-  const faceH = Math.min(canvas.height * 0.5, 400);
-
-  ctx.fillStyle = "#d0c8b0";
-  ctx.beginPath();
-  ctx.moveTo(cx - faceW, cy - faceH * 0.8);
-  ctx.bezierCurveTo(cx - faceW * 1.3, cy + faceH * 0.2, cx - faceW * 0.6, cy + faceH, cx, cy + faceH * 1.2);
-  ctx.bezierCurveTo(cx + faceW * 0.6, cy + faceH, cx + faceW * 1.3, cy + faceH * 0.2, cx + faceW, cy - faceH * 0.8);
-  ctx.closePath();
-  ctx.fill();
-
-  for (let i = -faceW * 0.8; i <= faceW * 0.8; i += 30) {
-    ctx.fillRect(cx + i, cy + faceH * 0.7, 18, 80 + Math.random() * 100);
-  }
-
-  ctx.fillStyle = "#000";
-  ctx.beginPath();
-  ctx.ellipse(cx - faceW * 0.4, cy - faceH * 0.2, 55, 80, 0.3, 0, Math.PI * 2);
-  ctx.ellipse(cx + faceW * 0.4, cy - faceH * 0.1, 45, 90, -0.3, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.ellipse(cx, cy + faceH * 0.4, 65, 140, 0, 0, Math.PI * 2);
-  ctx.fill();
-}
-
-// 5. 全屏极密纯红诅咒血字
-function drawDenseTextRed() {
-  const { canvas, ctx } = getCanvasCtx();
-  ctx.fillStyle = "#3d0000";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.font = "900 20px monospace";
-  for (let y = 24; y < canvas.height; y += 22) {
-    for (let x = 0; x < canvas.width; x += 120) {
-      ctx.fillStyle = Math.random() > 0.5 ? "#ff0000" : "#000000";
-      ctx.fillText("死死死死死死", x, y);
-    }
-  }
-}
-
-// 6. 全屏充血红眼凝视
+// 2. 🩸 纯黑深渊 · 密布分叉血丝恶魔眼眶凝视（第7题）
 function drawEyesJumpscare() {
   const { canvas, ctx, cx, cy } = getCanvasCtx();
-  ctx.fillStyle = "rgba(0, 0, 0, 0.96)";
+  ctx.fillStyle = "#000000";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  drawScreenCreepingVeins(ctx, canvas.width, canvas.height);
 
   const eyeDist = Math.min(canvas.width * 0.22, 220);
 
   for (let i = -1; i <= 1; i += 2) {
     const ex = cx + i * eyeDist;
     const ey = cy;
-    ctx.fillStyle = "#ffdddd";
+
+    // 1. 深暗红巩膜（暗红至黑，绝不发白发亮）
+    const eyeGrad = ctx.createRadialGradient(ex, ey, 10, ex, ey, 120);
+    eyeGrad.addColorStop(0, "#880000");
+    eyeGrad.addColorStop(0.4, "#440000");
+    eyeGrad.addColorStop(0.8, "#1a0000");
+    eyeGrad.addColorStop(1, "#050000");
+    ctx.fillStyle = eyeGrad;
     ctx.beginPath();
     ctx.ellipse(ex, ey, 130, 75, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.strokeStyle = "#aa0000";
-    ctx.lineWidth = 3.5;
-    for (let s = 0; s < 16; s++) {
-      ctx.beginPath();
-      ctx.moveTo(ex + (Math.random() - 0.5) * 50, ey + (Math.random() - 0.5) * 25);
-      ctx.lineTo(ex + (Math.random() - 0.5) * 220, ey + (Math.random() - 0.5) * 110);
-      ctx.stroke();
+    // 2. 密密麻麻的多层多级分叉血丝网络（由中心向外爆裂蔓延）
+    for (let s = 0; s < 26; s++) {
+      const a = (s / 26) * Math.PI * 2 + (Math.random() - 0.5) * 0.2;
+      drawBranchingVein(ctx, ex + Math.cos(a) * 15, ey + Math.sin(a) * 15, 60 + Math.random() * 55, a, 4, "#ff1a1a");
     }
 
-    ctx.fillStyle = "#ff0000";
+    // 3. 漆黑深渊空洞瞳孔 + 灼热微弱血圈
+    ctx.fillStyle = "#000000";
     ctx.beginPath();
-    ctx.arc(ex, ey, 34, 0, Math.PI * 2);
+    ctx.arc(ex, ey, 32, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = "#000";
-    ctx.beginPath();
-    ctx.arc(ex, ey, 14, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.strokeStyle = "#aa0000";
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // 4. 下方拉丝血垂
+    for (let d = -40; d <= 40; d += 25) {
+      drawDarkViscousBloodTendril(ctx, ex + d, ey + 40, 80 + Math.random() * 80, 10, 5);
+    }
   }
 }
 
-// 7. 全屏拍击血手印
+// 3. 🩸 暗黑深渊拖拽血手印 + 蔓生血丝（第18题）
 function drawHandsJumpscare() {
   const { canvas, ctx } = getCanvasCtx();
-  ctx.fillStyle = "rgba(10, 0, 0, 0.92)";
+  ctx.fillStyle = "#000000";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  function drawHand(hx, hy, scale) {
-    ctx.fillStyle = "rgba(220, 0, 0, 0.94)";
+  drawScreenCreepingVeins(ctx, canvas.width, canvas.height);
+
+  function drawDarkHandWithVeins(hx, hy, scale) {
+    // 掌心暗血印记
+    const palmGrad = ctx.createRadialGradient(hx, hy, 10 * scale, hx, hy, 55 * scale);
+    palmGrad.addColorStop(0, "rgba(160, 0, 0, 0.95)");
+    palmGrad.addColorStop(0.7, "rgba(80, 0, 0, 0.8)");
+    palmGrad.addColorStop(1, "transparent");
+    ctx.fillStyle = palmGrad;
     ctx.beginPath();
-    ctx.arc(hx, hy, 55 * scale, 0, Math.PI * 2);
+    ctx.arc(hx, hy, 52 * scale, 0, Math.PI * 2);
     ctx.fill();
-    for (let f = -2; f <= 2; f++) {
-      ctx.beginPath();
-      ctx.ellipse(hx + f * 24 * scale, hy - 65 * scale, 14 * scale, 42 * scale, f * 0.2, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillRect(hx + f * 24 * scale - 5, hy + 25, 10 * scale, 80 * scale);
+
+    // 掌心炸裂血丝
+    for (let i = 0; i < 8; i++) {
+      const a = Math.random() * Math.PI * 2;
+      drawBranchingVein(ctx, hx, hy, 50 * scale, a, 3, "#cc0000");
     }
+
+    // 五指
+    for (let f = -2; f <= 2; f++) {
+      const fx = hx + f * 24 * scale;
+      const fy = hy - 65 * scale;
+      ctx.fillStyle = "rgba(140, 0, 0, 0.9)";
+      ctx.beginPath();
+      ctx.ellipse(fx, fy, 12 * scale, 38 * scale, f * 0.18, 0, Math.PI * 2);
+      ctx.fill();
+
+      drawDarkViscousBloodTendril(ctx, fx, fy + 20, 110 * scale + Math.random() * 80, 14 * scale, 7 * scale);
+    }
+
+    drawDarkViscousBloodTendril(ctx, hx - 15 * scale, hy + 35 * scale, 130 * scale, 18 * scale, 10 * scale);
+    drawDarkViscousBloodTendril(ctx, hx + 15 * scale, hy + 35 * scale, 150 * scale, 18 * scale, 10 * scale);
   }
 
-  drawHand(canvas.width * 0.22, canvas.height * 0.45, 1.4);
-  drawHand(canvas.width * 0.78, canvas.height * 0.4, 1.5);
-  drawHand(canvas.width * 0.5, canvas.height * 0.65, 1.8);
+  drawDarkHandWithVeins(canvas.width * 0.22, canvas.height * 0.45, 1.3);
+  drawDarkHandWithVeins(canvas.width * 0.78, canvas.height * 0.4, 1.4);
+  drawDarkHandWithVeins(canvas.width * 0.5, canvas.height * 0.65, 1.6);
 }
 
-// 8. 全屏深渊裂嘴诡笑
+// 4. 深渊怪诞面孔矩阵（第22题 · 彻底调暗）
+function drawDenseDistortedFaces() {
+  const { canvas, ctx } = getCanvasCtx();
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const rows = Math.ceil(canvas.height / 150);
+  const cols = Math.ceil(canvas.width / 170);
+  const cellW = canvas.width / cols;
+  const cellH = canvas.height / rows;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const fx = c * cellW + cellW / 2;
+      const fy = r * cellH + cellH / 2;
+
+      ctx.save();
+      ctx.translate(fx, fy);
+      ctx.scale(0.85, 1.2);
+
+      // 死尸暗灰骨相渐变
+      const faceGrad = ctx.createRadialGradient(0, 0, 10, 0, 0, cellW * 0.4);
+      faceGrad.addColorStop(0, "#2c302d");
+      faceGrad.addColorStop(0.6, "#151715");
+      faceGrad.addColorStop(1, "#030403");
+      ctx.fillStyle = faceGrad;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, cellW * 0.35, cellH * 0.42, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 面部爬行细微血丝
+      drawBranchingVein(ctx, -15, -10, 25, Math.PI * 0.8, 2, "#990000");
+      drawBranchingVein(ctx, 15, -10, 25, Math.PI * 0.2, 2, "#990000");
+
+      // 空洞黑眼
+      ctx.fillStyle = "#000";
+      ctx.beginPath();
+      ctx.ellipse(-18, -12, 12, 18, 0.1, 0, Math.PI * 2);
+      ctx.ellipse(18, -12, 12, 18, -0.1, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 鲜红微点
+      ctx.fillStyle = "#cc0000";
+      ctx.beginPath();
+      ctx.arc(-18, -12, 2, 0, Math.PI * 2);
+      ctx.arc(18, -12, 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 撕裂深渊大嘴
+      ctx.fillStyle = "#000";
+      ctx.beginPath();
+      ctx.ellipse(0, 26, 16, 30, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+  }
+}
+
+// 5. 蜡质暗沉融化鬼脸（第25题）
+function drawMeltingFace() {
+  const { canvas, ctx, cx, cy } = getCanvasCtx();
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  drawScreenCreepingVeins(ctx, canvas.width, canvas.height);
+
+  const faceW = Math.min(canvas.width * 0.36, 260);
+  const faceH = Math.min(canvas.height * 0.48, 380);
+
+  // 极暗肉色渐变
+  const meltGrad = ctx.createLinearGradient(0, cy - faceH, 0, cy + faceH);
+  meltGrad.addColorStop(0, "#3a3830");
+  meltGrad.addColorStop(0.6, "#1f1e1a");
+  meltGrad.addColorStop(1, "#080806");
+
+  ctx.fillStyle = meltGrad;
+  ctx.beginPath();
+  ctx.moveTo(cx - faceW, cy - faceH * 0.7);
+  ctx.bezierCurveTo(cx - faceW * 1.2, cy + faceH * 0.3, cx - faceW * 0.4, cy + faceH, cx, cy + faceH * 1.15);
+  ctx.bezierCurveTo(cx + faceW * 0.4, cy + faceH, cx + faceW * 1.2, cy + faceH * 0.3, cx + faceW, cy - faceH * 0.7);
+  ctx.closePath();
+  ctx.fill();
+
+  // 融化面部蔓生血丝
+  for (let i = -100; i <= 100; i += 40) {
+    drawBranchingVein(ctx, cx + i, cy - 50, 60, Math.PI / 2 + (Math.random() - 0.5) * 0.4, 3, "#880000");
+  }
+
+  // 黑洞眼眶
+  ctx.fillStyle = "#000";
+  ctx.beginPath();
+  ctx.ellipse(cx - faceW * 0.38, cy - faceH * 0.15, 45, 75, 0.25, 0, Math.PI * 2);
+  ctx.ellipse(cx + faceW * 0.38, cy - faceH * 0.05, 38, 85, -0.25, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + faceH * 0.45, 55, 130, 0, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// 6. 深渊高反差裂嘴诡笑（第28题）
 function drawSmileJumpscare() {
   const { canvas, ctx, cx, cy } = getCanvasCtx();
-  ctx.fillStyle = "#020202";
+  ctx.fillStyle = "#000000";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  drawScreenCreepingVeins(ctx, canvas.width, canvas.height);
 
   const eyeDist = Math.min(canvas.width * 0.18, 160);
 
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = "#cc0000";
   ctx.beginPath();
-  ctx.arc(cx - eyeDist, cy - 80, 24, 0, Math.PI * 2);
-  ctx.arc(cx + eyeDist, cy - 80, 24, 0, Math.PI * 2);
+  ctx.arc(cx - eyeDist, cy - 80, 16, 0, Math.PI * 2);
+  ctx.arc(cx + eyeDist, cy - 80, 16, 0, Math.PI * 2);
   ctx.fill();
 
   const mouthRadius = Math.min(canvas.width * 0.28, 240);
-  ctx.strokeStyle = "#990000";
-  ctx.lineWidth = 18;
+  ctx.strokeStyle = "#660000";
+  ctx.lineWidth = 12;
   ctx.beginPath();
   ctx.arc(cx, cy + 20, mouthRadius, 0.15 * Math.PI, 0.85 * Math.PI, false);
   ctx.stroke();
 
-  ctx.fillStyle = "#fff";
+  // 尖牙
+  ctx.fillStyle = "#999999";
   for (let x = -mouthRadius * 0.75; x <= mouthRadius * 0.75; x += 28) {
     ctx.beginPath();
     ctx.moveTo(cx + x, cy + 120);
-    ctx.lineTo(cx + x + 10, cy + 170);
-    ctx.lineTo(cx + x + 20, cy + 120);
+    ctx.lineTo(cx + x + 8, cy + 165);
+    ctx.lineTo(cx + x + 16, cy + 120);
     ctx.fill();
   }
 }
 
-// 9. 全屏信号中断黑屏失真
+// 7. 信号丢失黑屏（第34题）
 function drawSignalLostJumpscare() {
   const { canvas, ctx, cx, cy } = getCanvasCtx();
   ctx.fillStyle = "#000";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = "#ff0000";
-  ctx.font = "bold clamp(24px, 4vw, 42px) monospace";
+  ctx.fillStyle = "#cc0000";
+  ctx.font = "bold clamp(22px, 4vw, 38px) monospace";
   ctx.textAlign = "center";
   ctx.fillText("--- [ FATAL: HOST SUBJECT DETECTED ] ---", cx, cy - 20);
-  ctx.font = "clamp(16px, 2.5vw, 24px) monospace";
+  ctx.font = "clamp(16px, 2.5vw, 22px) monospace";
   ctx.fillText("IT IS STANDING RIGHT BEHIND YOUR BACK", cx, cy + 40);
 
   for (let i = 0; i < 900; i++) {
-    ctx.fillStyle = Math.random() > 0.5 ? "#fff" : "#f00";
-    ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 4, 4);
+    ctx.fillStyle = Math.random() > 0.5 ? "#555" : "#800";
+    ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 3, 3);
   }
 }
 
-// 10. 终极全屏血泪鬼脸与双手抓屏（第40题大高潮）
+// 8. 🩸 终极纯黑深渊 · 密布血丝拉丝血泪恶灵大跳杀（第40题大高潮 · 彻底调暗）
 function drawBleedingTearsFace() {
   const { canvas, ctx, cx, cy } = getCanvasCtx();
-  ctx.fillStyle = "rgba(0, 0, 0, 0.96)";
+  ctx.fillStyle = "#000000";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // 全屏向中心疯狂蔓延的暗红血丝
+  drawScreenCreepingVeins(ctx, canvas.width, canvas.height);
 
   const faceW = Math.min(canvas.width * 0.28, 220);
   const faceH = Math.min(canvas.height * 0.45, 300);
 
-  ctx.fillStyle = "#cfcfcf";
+  // 极度阴暗的死尸骨相（从纯黑深渊中隐隐浮现）
+  const faceGrad = ctx.createRadialGradient(cx, cy, 20, cx, cy, faceH);
+  faceGrad.addColorStop(0, "#282c29"); // 极暗死灰色
+  faceGrad.addColorStop(0.5, "#141715");
+  faceGrad.addColorStop(0.85, "#080a08");
+  faceGrad.addColorStop(1, "transparent");
+  ctx.fillStyle = faceGrad;
   ctx.beginPath();
   ctx.ellipse(cx, cy, faceW, faceH, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = "#080000";
+  // 面部与太阳穴炸裂蔓生的密集分叉血丝
+  for (let i = 0; i < 14; i++) {
+    const startX = cx + (Math.random() - 0.5) * faceW * 1.2;
+    const startY = cy - faceH * 0.3 + Math.random() * faceH * 0.5;
+    drawBranchingVein(ctx, startX, startY, 45 + Math.random() * 35, Math.random() * Math.PI * 2, 3, "#cc0000");
+  }
+
+  // 漆黑撕裂眼窝
+  ctx.fillStyle = "#000000";
   ctx.beginPath();
-  ctx.ellipse(cx - faceW * 0.38, cy - faceH * 0.18, faceW * 0.24, faceH * 0.24, 0.1, 0, Math.PI * 2);
-  ctx.ellipse(cx + faceW * 0.38, cy - faceH * 0.18, faceW * 0.24, faceH * 0.24, -0.1, 0, Math.PI * 2);
+  ctx.ellipse(cx - faceW * 0.38, cy - faceH * 0.18, faceW * 0.22, faceH * 0.24, 0.1, 0, Math.PI * 2);
+  ctx.ellipse(cx + faceW * 0.38, cy - faceH * 0.18, faceW * 0.22, faceH * 0.24, -0.1, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = "#aa0000";
+  // 眼眶周围向外炸出的深红血丝
+  for (let s = 0; s < 16; s++) {
+    const a = (s / 16) * Math.PI * 2;
+    drawBranchingVein(ctx, cx - faceW * 0.38 + Math.cos(a) * 20, cy - faceH * 0.18 + Math.sin(a) * 20, 35, a, 3, "#aa0000");
+    drawBranchingVein(ctx, cx + faceW * 0.38 + Math.cos(a) * 20, cy - faceH * 0.18 + Math.sin(a) * 20, 35, a, 3, "#aa0000");
+  }
+
+  // 撕裂深渊大嘴
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + faceH * 0.45, faceW * 0.35, faceH * 0.4, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 滚滚暗红黏稠拉丝血泪垂落
   for(let offset of [-faceW * 0.38, faceW * 0.38]) {
-    for (let i = 0; i < 10; i++) {
-      ctx.beginPath();
-      let startX = cx + offset + (i - 5) * 11;
-      let startY = cy - faceH * 0.05;
-      let length = faceH * 0.6 + Math.random() * 120;
-      ctx.rect(startX, startY, 5 + Math.random() * 5, length);
-      ctx.fill();
+    for (let i = 0; i < 7; i++) {
+      const startX = cx + offset + (i - 3) * 13;
+      const startY = cy - faceH * 0.05;
+      const length = faceH * 0.75 + Math.random() * 150;
+      drawDarkViscousBloodTendril(ctx, startX, startY, length, 12, 6);
     }
   }
 
-  ctx.fillStyle = "#150000";
-  ctx.beginPath();
-  ctx.ellipse(cx, cy + faceH * 0.45, faceW * 0.36, faceH * 0.38, 0, 0, Math.PI * 2);
-  ctx.fill();
+  // 嘴角流血拉丝
+  drawDarkViscousBloodTendril(ctx, cx - faceW * 0.2, cy + faceH * 0.65, 120, 16, 9);
+  drawDarkViscousBloodTendril(ctx, cx + faceW * 0.2, cy + faceH * 0.65, 130, 16, 9);
 
-  function drawHand(hx, hy) {
-    ctx.fillStyle = "rgba(200, 0, 0, 0.92)";
-    ctx.beginPath(); ctx.arc(hx, hy, 55, 0, Math.PI * 2); ctx.fill();
+  // 两侧暗黑血手印
+  function drawRealisticHand(hx, hy) {
+    ctx.fillStyle = "rgba(120, 0, 0, 0.85)";
+    ctx.beginPath(); ctx.arc(hx, hy, 50, 0, Math.PI * 2); ctx.fill();
+
     for (let f = -2; f <= 2; f++) {
       ctx.beginPath();
-      ctx.ellipse(hx + f * 24, hy - 65, 14, 42, f * 0.15, 0, Math.PI * 2);
+      ctx.ellipse(hx + f * 22, hy - 58, 12, 38, f * 0.15, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillRect(hx + f * 24 - 5, hy + 25, 10, 70);
+      drawDarkViscousBloodTendril(ctx, hx + f * 22, hy - 30, 120, 12, 6);
     }
   }
-  drawHand(cx - faceW * 1.5, cy);
-  drawHand(cx + faceW * 1.5, cy);
+  drawRealisticHand(cx - faceW * 1.5, cy);
+  drawRealisticHand(cx + faceW * 1.5, cy);
+}
+
+// ==================== 🌊 文字霸屏一点点蔓延并停留系统 ====================
+function triggerProgressiveTextFlood(isRed = false, onComplete) {
+  const { canvas, ctx } = getCanvasCtx();
+  canvas.style.display = "block";
+  ctx.fillStyle = isRed ? "#120000" : "#000000";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  drawScreenCreepingVeins(ctx, canvas.width, canvas.height);
+
+  const texts = isRed 
+    ? ["死", "死死", "逃不掉", "死死死", "留下来", "死"]
+    : ["他在你背后", "回头", "死", "别看他", "他在看着你", "逃不掉了", "抓到你了", "别眨眼", "床底有人", "嘻嘻嘻"];
+
+  let currentY = 24;
+  const lineSpacing = 24;
+  const colSpacing = 110;
+
+  const interval = setInterval(() => {
+    ctx.font = "bold 16px monospace";
+    for (let x = 0; x < canvas.width; x += colSpacing) {
+      ctx.fillStyle = isRed
+        ? (Math.random() > 0.4 ? "#cc0000" : "#400000")
+        : (Math.random() > 0.4 ? "#aa0000" : (Math.random() > 0.5 ? "#400000" : "#888888"));
+      const word = texts[Math.floor(Math.random() * texts.length)];
+      ctx.fillText(word, x + (Math.random() * 8 - 4), currentY);
+    }
+
+    currentY += lineSpacing;
+
+    if (currentY >= canvas.height) {
+      clearInterval(interval);
+
+      // 中心巨大暗红文字
+      ctx.fillStyle = "#cccccc";
+      ctx.font = "900 clamp(32px, 6vw, 64px) monospace";
+      ctx.textAlign = "center";
+      ctx.shadowColor = "#cc0000";
+      ctx.shadowBlur = 30;
+      ctx.fillText(isRed ? "【 抓 到 你 了 】" : "【 他 正 趴 在 你 头 顶 】", canvas.width / 2, canvas.height / 2);
+
+      // 停留压迫 2 秒钟再消失
+      setTimeout(() => {
+        canvas.style.display = "none";
+        if (onComplete) onComplete();
+      }, 2000);
+    }
+  }, 35);
+}
+
+// ==================== 渐进环境恶化与微闪系统 ====================
+function updateEnvironmentAtmosphere() {
+  const progress = currentIdx / QUESTIONS.length;
+
+  const vignetteSize = Math.max(25, 75 - progress * 50);
+  document.documentElement.style.setProperty('--vignette-size', `${vignetteSize}%`);
+
+  const dim = Math.max(0.55, 1 - progress * 0.45);
+  document.documentElement.style.setProperty('--monitor-dim', dim);
+
+  if (currentIdx > 20 && Math.random() > 0.6) {
+    const monitor = document.getElementById("monitor");
+    monitor.style.opacity = (0.6 + Math.random() * 0.25).toString();
+    setTimeout(() => { monitor.style.opacity = "1"; }, 60 + Math.random() * 80);
+  }
 }
 
 // ==================== 流程驱动与渲染 ====================
@@ -925,9 +1102,11 @@ function renderQuestion() {
   qIdxElem.innerText = `QUESTION ${currentIdx + 1 < 10 ? '0' + (currentIdx + 1) : (currentIdx + 1)} / 44`;
   
   if (currentIdx > 20) {
-    document.getElementById("monitor").style.borderColor = "#4a0000";
-    document.getElementById("status-light").style.background = "#ff0000";
+    document.getElementById("monitor").style.borderColor = "#280000";
+    document.getElementById("status-light").style.background = "#cc0000";
   }
+
+  updateEnvironmentAtmosphere();
 
   qTextElem.innerHTML = "";
   let charIdx = 0;
@@ -988,8 +1167,11 @@ function handleChoice(qData) {
     triggerFullscreenJumpscare(drawEyesJumpscare, 900, false, true);
     return;
   }
-  if (qData.jumpscareType === "dense_text") {
-    triggerFullscreenJumpscare(drawDenseTextFlood, 1100, false, false);
+  if (qData.jumpscareType === "dense_text_progressive") {
+    triggerProgressiveTextFlood(false, () => {
+      currentIdx++;
+      renderQuestion();
+    });
     return;
   }
   if (qData.jumpscareType === "hands_violent") {
@@ -1008,8 +1190,11 @@ function handleChoice(qData) {
     triggerFullscreenJumpscare(drawSmileJumpscare, 1000, false, false);
     return;
   }
-  if (qData.jumpscareType === "dense_text_red") {
-    triggerFullscreenJumpscare(drawDenseTextRed, 900, false, false);
+  if (qData.jumpscareType === "dense_text_red_progressive") {
+    triggerProgressiveTextFlood(true, () => {
+      currentIdx++;
+      renderQuestion();
+    });
     return;
   }
   if (qData.jumpscareType === "signallost") {
@@ -1028,13 +1213,13 @@ function handleChoice(qData) {
     document.querySelector(".quiz-container").innerHTML = `
       <div style="text-align:center; padding-top:80px; color: var(--neon-red);">
         <h1 style="font-size:30px; letter-spacing:4px; margin-bottom:20px;">[ 44 道检测完成 · 它已经钻进被窝了 ]</h1>
-        <p style="font-size:16px; color:#888;">今晚请千万不要回头看。</p>
+        <p style="font-size:16px; color:#555;">今晚请千万不要回头看。</p>
       </div>
     `;
   }
 }
 
-// 第 40 题：破框全屏全景回头 + 终极大跳杀
+// 第 40 题：破框全景回头 + 纯黑深渊血丝恶灵大跳杀
 function executeBehindYouJumpscare() {
   const panView = document.getElementById("fullscreen-pan-view");
   const panorama = document.getElementById("panorama");
