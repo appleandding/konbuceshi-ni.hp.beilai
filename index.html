@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SYSTEM_DIAGNOSIS_44_FULLSCREEN.EXE</title>
+<style>
+  :root {
+    --blood-red: #8b0000;
+    --neon-red: #ff1a1a;
+    --term-green: #00ff66;
+    --bg-dark: #030303;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: "Courier New", Consolas, "PingFang SC", "Microsoft YaHei", monospace; }
+  body {
+    background-color: var(--bg-dark);
+    color: #bbb;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  /* CRT 显示器扫描线与暗角滤镜 */
+  .crt-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.45) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05));
+    background-size: 100% 3px, 6px 100%;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* 模拟复古电脑外壳（居中显示） */
+  .monitor-frame {
+    width: 940px;
+    max-width: 92vw;
+    height: 640px;
+    max-height: 90vh;
+    background: #111;
+    border: 16px solid #202020;
+    border-radius: 20px;
+    box-shadow: 0 0 80px rgba(0,0,0,0.98), inset 0 0 100px rgba(0,0,0,0.9);
+    position: relative;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: border-color 0.4s;
+    z-index: 10;
+  }
+
+  /* 标题栏与系统信息 */
+  .system-header {
+    border-bottom: 1px dashed #333;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #666;
+  }
+
+  .status-light {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--term-green);
+    box-shadow: 0 0 8px var(--term-green);
+    margin-right: 6px;
+    animation: blink 1.2s infinite;
+  }
+
+  /* 问答区域 */
+  .quiz-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    z-index: 10;
+  }
+
+  .question-idx {
+    font-size: 14px;
+    color: var(--neon-red);
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+    text-shadow: 0 0 8px var(--blood-red);
+  }
+
+  .question-box {
+    font-size: 21px;
+    line-height: 1.6;
+    color: #e0e0e0;
+    min-height: 110px;
+    text-shadow: 0 0 5px rgba(255,255,255,0.2);
+  }
+
+  .answers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 25px;
+  }
+
+  .btn-choice {
+    background: rgba(20, 20, 20, 0.88);
+    border: 1px solid #444;
+    color: #aaa;
+    padding: 15px 20px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    outline: none;
+  }
+  .btn-choice:hover {
+    background: #2a0000;
+    border-color: var(--neon-red);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+    transform: scale(1.02);
+  }
+
+  /* 免责声明弹窗 */
+  #disclaimer-modal {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.97);
+    z-index: 99999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-box {
+    width: 660px;
+    max-width: 90vw;
+    border: 2px solid var(--blood-red);
+    background: #0d0d0d;
+    padding: 35px;
+    box-shadow: 0 0 60px rgba(255,0,0,0.4);
+    line-height: 1.8;
+  }
+
+  .modal-box h2 {
+    color: var(--neon-red);
+    margin-bottom: 15px;
+    font-size: 20px;
+    text-align: center;
+    letter-spacing: 4px;
+    border-bottom: 1px solid #300;
+    padding-bottom: 10px;
+  }
+
+  .modal-box p { font-size: 14px; color: #aaa; margin-bottom: 12px; }
+  .modal-box .warning-item { color: #ff5555; font-weight: bold; }
+
+  .accept-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 14px;
+    background: var(--blood-red);
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    letter-spacing: 3px;
+    transition: background 0.3s;
+  }
+  .accept-btn:hover { background: var(--neon-red); box-shadow: 0 0 25px var(--neon-red); }
+
+  /* ==================== 破框全屏跳杀层 (FIXED FULLSCREEN) ==================== */
+  #fullscreen-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: 10000;
+    display: none;
+    pointer-events: none;
+  }
+
+  /* 全屏全景回头视角 */
+  #fullscreen-pan-view {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: #000;
+    display: none;
+    z-index: 9999;
+    overflow: hidden;
+  }
+  .room-panorama {
+    width: 300vw;
+    height: 100vh;
+    position: absolute;
+    left: -100vw;
+    display: flex;
+    background: radial-gradient(circle at 50% 50%, #151515 10%, #010101 90%);
+    transition: transform 0.9s ease-in-out;
+  }
+  .room-scene {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #333;
+    font-size: 24px;
+    letter-spacing: 3px;
+    border-right: 1px solid #111;
+  }
+
+  /* 仅在最关键跳杀时使用的全屏暴烈震颤 */
+  body.violent-shock {
+    animation: fullScreenViolent 0.05s infinite;
+  }
+  @keyframes fullScreenViolent {
+    0% { transform: translate(12px, -10px) scale(1.03); filter: invert(0.9) contrast(3); }
+    50% { transform: translate(-14px, 12px) scale(0.98); filter: hue-rotate(180deg) saturate(2); }
+    100% { transform: translate(8px, 6px) scale(1.02); }
+  }
+
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+</style>
+</head>
+<body>
+
+<div class="crt-overlay"></div>
+
+<!-- ⚠️ 免责声明弹窗 -->
+<div id="disclaimer-modal">
+  <div class="modal-box">
+    <h2>⚠️ 免责声明与极度恐怖警示</h2>
+    <p class="warning-item">【全屏破框霸屏 & 极端心理压迫警告】</p>
+    <p>本测试包含：<strong>全屏幕突破边界的流血、密密麻麻扭曲怪脸、深渊文字吞噬、不可关闭循环背景音乐、突发高分贝刺耳跳杀</strong>。</p>
+    <p>• 患有<strong>心脏病、高血压、严重焦虑症、光敏性癫痫</strong>或其他精神易激者，请<strong>立即关闭网页退出</strong>。</p>
+    <p>• 未满 18 周岁未成年人禁止体验。</p>
+    <p>• 进入后<strong>背景音乐将全天候锁定循环播放且无法手动关闭</strong>，请调节适当耳机音量。</p>
+    <p>• 若过程中产生严重生理/心理不适，请随时按 <code>Ctrl+W</code> / <code>Cmd+W</code> 强制关闭网页退出。</p>
+    <button class="accept-btn" onclick="startGame()">我已阅读并知晓全部风险 · 开启测试</button>
+  </div>
+</div>
+
+<!-- 居中复古电脑显示器 -->
+<div class="monitor-frame" id="monitor">
+  <div class="system-header">
+    <div><span class="status-light" id="status-light"></span>TERMINAL://ENV_SENSING/SUBJECT_044</div>
+    <div id="live-time">03:14:07 AM</div>
+  </div>
+
+  <div class="quiz-container">
+    <div>
+      <div class="question-idx" id="q-idx">QUESTION 01 / 44</div>
+      <div class="question-box" id="q-text">正在载入环境扫描程序...</div>
+    </div>
+    <div class="answers-grid" id="q-options"></div>
+  </div>
+</div>
+
+<!-- 破框全屏全景回头层 -->
+<div id="fullscreen-pan-view">
+  <div class="room-panorama" id="panorama">
+    <div class="room-scene">← 房间左侧（黑漆漆的窗帘）</div>
+    <div class="room-scene">正前方（显示器微弱的反光）</div>
+    <div class="room-scene">房间右侧（虚掩的衣柜门） →</div>
+  </div>
+</div>
+
+<!-- 破框全屏跳杀 Canvas 画布 -->
+<canvas id="fullscreen-canvas"></canvas>
+
+<!-- 背景音乐（不可关闭，循环播放） -->
+<audio id="bg-audio" src="https://files.catbox.moe/iup720.mp3" preload="auto" loop></audio>
+
+<script>
+// ==================== 44 道恐怖问答与特效配置 ====================
+const QUESTIONS = [
+  { q: "现在……你确定是一个人在房间里吗？", ops: ["是的，只有我", "我不确定..."] },
+  { q: "你房间的门现在关严实了吗？锁舌扣上了吗？", ops: ["关好了", "好像留了一条缝"] },
+  { q: "你还记得上一次听到门外有脚步声是什么时候吗？", ops: ["几分钟前", "很久以前，或者没有"] },
+  { q: "请别低头看：你床底下现在塞满了杂物，还是留着空隙？", ops: ["塞满了东西", "底下是空的，能藏人"] },
+  
+  // ⚠️ 第 5 题：【全屏静默渗血垂滴】（破框全屏，黏稠流淌，无震动）
+  { 
+    q: "你面前的玻璃上……是不是有暗红色的液体正在从顶部渗出来？", 
+    ops: ["拉紧窗帘", "没拉，外面一片漆黑"], 
+    jumpscareType: "blood_ooze" 
+  },
+  
+  { q: "你衣柜的门平时会自动弹开一点点吗？", ops: ["偶尔会", "从来不会"] },
+
+  // ⚠️ 第 7 题：【全屏红眼深渊凝视】（突发电声尖啸，轻微闪烁）
+  {
+    q: "仔细看你的屏幕边缘……你确定黑暗里没有眼睛在死死瞪着你？",
+    ops: ["我看不到眼睛", "别说了，我好害怕"],
+    jumpscareType: "eyes"
+  },
+
+  { q: "你现在听到的环境音，真的完全来自电脑扬声器吗？", ops: ["是耳机里的声音", "好像房间角落也有杂音"] },
+  { q: "你的余光里，房间右上角的天花板是不是比其他地方更暗？", ops: ["别说了...", "我没敢往上看"] },
+  { q: "【听觉测试】你有听到耳边极轻极轻的呼气声吗？", ops: ["听到了！", "没有声音"], sfx: "whisper" },
+
+  // ⚠️ 第 11 题：【密密麻麻文字全屏吞噬】（静默压迫，无震动）
+  {
+    q: "如果现在整个屏幕被密密麻麻的‘他在看你’完全吞噬……",
+    ops: ["不要这样！", "我快疯了"],
+    jumpscareType: "dense_text"
+  },
+
+  { q: "如果现在有人在你耳边很轻地吹一口气，你会？", ops: ["猛回头", "浑身僵硬不敢动"] },
+  { q: "你现在脚底踩在地板上，还是悬在半空中？", ops: ["踩在地上", "缩在椅子/床上"] },
+  { q: "你确定你身后的影子，动作和你完全同步吗？", ops: ["不要吓我", "当然同步"], sfx: "heartbeat" },
+  { q: "平时睡觉时，你习惯把脸朝向墙壁，还是朝向空荡荡的房间？", ops: ["朝向墙壁", "朝向房间外侧"] },
+  { q: "如果镜子里的倒影比你慢半秒钟眨眼，你能发现吗？", ops: ["能发现", "不会注意到"] },
+  { q: "你身后的门锁刚才是不是发出了一声非常轻微的‘咔哒’声？", ops: ["你听错了", "我好像也听到了..."], sfx: "knock" },
+
+  // ⚠️ 第 18 题：【猝不及防！血手印暴击拍屏】（💥 触发全屏暴烈震颤 + 爆破撞击）
+  {
+    q: "如果下一秒，有巨大血手印直接重重拍在你的屏幕玻璃上……",
+    ops: ["不可能发生", "快停下来！"],
+    jumpscareType: "hands_violent"
+  },
+
+  { q: "你现在坐的椅子靠背，能完全挡住你的后背吗？", ops: ["能挡住", "挡不住，后背悬空"] },
+  { q: "请回想一下：几秒钟之前，你眼角余光是不是闪过了一个黑影？", ops: ["是幻觉吧...", "绝对没有！"] },
+  { q: "如果有人正贴着你的床底木板向上听你的心跳，你怎么办？", ops: ["立刻跳起来", "闭上眼睛装作不知道"], sfx: "heartbeat" },
+
+  // ⚠️ 第 22 题：【全屏密密麻麻挤压变形怪脸矩阵】（无震动，压迫静止凝视）
+  {
+    q: "【视觉污染】整个视野里挤满了数十张被压扁抽搐的面孔死盯着你……",
+    ops: ["啊啊啊啊！", "救命！！"],
+    jumpscareType: "dense_faces"
+  },
+
+  { q: "【门外异响】嘘……听，门外是不是有指甲在抠门？", ops: ["我听到了！", "没有声音"], sfx: "scratch" },
+  { q: "你确定你刚才锁门时，锁芯真的转到底了吗？", ops: ["我确定锁了", "我记不清了..."] },
+  
+  // ⚠️ 第 25 题：【蜡质融化下垂巨口鬼脸】（深层心理不适，无震动）
+  { 
+    q: "你衣柜深处那张像蜡一样融化的脸，正在朝你笑呢……", 
+    ops: ["不要看衣柜！", "快关上门！"], 
+    jumpscareType: "melting_face" 
+  },
+
+  { q: "你手机最后一条收到的未读消息，会不会是一张你现在的背影照片？", ops: ["不要说这种话", "我没看手机"] },
+  { q: "你的房间窗户外面……如果是高楼，你觉得有人能贴在玻璃上看你吗？", ops: ["绝对不可能", "窗外有声音..."] },
+
+  // ⚠️ 第 28 题：【深渊裂嘴诡笑】（极暗环境突现笑容）
+  {
+    q: "如果整个屏幕映出一张不是你的裂嘴鬼笑……",
+    ops: ["别吓我！", "立刻关掉显示器！"],
+    jumpscareType: "smile"
+  },
+
+  { q: "你有没有感觉……有冰凉的手指刚刚碰到了你的脚踝？", ops: ["没有！", "我的脚缩起来了"] },
+  { q: "你的后颈现在是不是越来越重，像是有下巴搁在你的肩膀上？", ops: ["好酸，好重...", "心理作用而已"], sfx: "tinnitus" },
+
+  // ⚠️ 第 31 题：【密密麻麻血字狂暴覆盖】
+  {
+    q: "【精神崩溃】‘逃不掉了逃不掉了逃不掉了’……你听见它们在念了吗？",
+    ops: ["快让我退出！", "我听不见！"],
+    jumpscareType: "dense_text_red"
+  },
+
+  { q: "如果门外现在响起了剧烈的砸门声，你敢去猫眼看一眼吗？", ops: ["打死也不看", "直接报警"], sfx: "knock" },
+  { q: "你确定你现在是在自己的房间，而不是在停尸房的梦境里吗？", ops: ["别胡说八道", "我开始怀疑了"] },
+
+  // ⚠️ 第 34 题：【全屏信号中断黑屏 + 恶灵站在跟前】
+  {
+    q: "请闭上眼睛3秒钟。你敢保证睁开眼时它没有站在你跟前吗？",
+    ops: ["我不敢闭眼...", "我敢试！"],
+    jumpscareType: "signallost"
+  },
+
+  { q: "你衣柜门缝里的那道阴影，刚才是不是变粗了一点？", ops: ["是光线变化", "好像真的动了"] },
+  { q: "你身后的那堵墙里，会不会砌着别的东西？", ops: ["隔音很差而已", "不要再问了！"] },
+  { q: "你刚才眨眼的一瞬间，屏幕是不是红了一下？", ops: ["好像是...", "没有"], sfx: "heartbeat" },
+  { q: "如果我现在告诉你，房间里的摄像头已经被入侵了，你信吗？", ops: ["我不信", "我把摄像头贴住了"] },
+  { q: "距离这个测试结束还有最后几道题，你觉得你能平安答完吗？", ops: ["能", "我想退出了"] },
+
+  // ⚠️ 第 40 题：【终极全屏全景回头 + 满屏血泪鬼脸 + 血手印】（💥💥 全场最强暴烈震颤跳杀！）
+  {
+    q: "【最后确认】请别回头。你 100% 确定你的后背上，现在没有趴着一个人正贴着你的脖子喘气吗？",
+    ops: ["我不确定...（校准环顾周围）", "我背后绝对没人！（回头看）"],
+    jumpscareType: "look_behind"
+  },
+
+  { q: "【劫后余生】刚才……你看清楚趴在你背后的东西了吗？", ops: ["看清楚了，太可怕了", "我什么都没看到"] },
+  { q: "它的血眼泪滴在你身上了吗？", ops: ["好像滴在屏幕上了", "没有"] },
+  { q: "你现在的心率是不是已经超过了 140 次/分？", ops: ["心跳得极快", "快被吓疯了"], sfx: "heartbeat" },
+  { q: "【第44题 · 终章】它已经记住你的脸了。今天晚上，你确定你睡得着吗？", ops: ["晚安……如果我还能醒来的话", "立刻开全屋大灯！"] }
+];
+
+let currentIdx = 0;
+let audioCtx = null;
+const bgAudio = document.getElementById("bg-audio");
+
+bgAudio.addEventListener("ended", () => {
+  bgAudio.currentTime = 0;
+  bgAudio.play();
+});
+
+// ==================== Web Audio 合成音效 ====================
+function initAudio() {
+  if (!audioCtx) {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AudioContext();
+  }
+  bgAudio.volume = 0.75;
+  bgAudio.play().catch(e => console.log("BGM Play:", e));
+}
+
+function playClickSound() {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "triangle";
+  osc.frequency.setValueAtTime(260 + Math.random() * 150, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.08);
+  gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.08);
+}
+
+// 突脸高分贝尖叫与撕裂音效
+function playScreamerAudio(duration = 1.2, intensity = 1.0) {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+
+  const bufferSize = audioCtx.sampleRate * duration;
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * intensity;
+
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = buffer;
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.setValueAtTime(1.0 * intensity, now);
+  noiseGain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+  noise.connect(noiseGain);
+  noiseGain.connect(audioCtx.destination);
+  noise.start(now);
+
+  const osc = audioCtx.createOscillator();
+  const oscGain = audioCtx.createGain();
+  osc.type = "sawtooth";
+  osc.frequency.setValueAtTime(900, now);
+  osc.frequency.linearRampToValueAtTime(3600, now + 0.2);
+  osc.frequency.linearRampToValueAtTime(150, now + duration);
+
+  oscGain.gain.setValueAtTime(0.9 * intensity, now);
+  oscGain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+
+  osc.connect(oscGain);
+  oscGain.connect(audioCtx.destination);
+  osc.start(now);
+  osc.stop(now + duration);
+}
+
+// 低频压迫潜音（用于静止渗血/怪脸）
+function playCreepyDrone(duration = 1.2) {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "sawtooth";
+  osc.frequency.setValueAtTime(55, now);
+  osc.frequency.linearRampToValueAtTime(35, now + duration);
+  gain.gain.setValueAtTime(0.5, now);
+  gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(now);
+  osc.stop(now + duration);
+}
+
+function playKnockSound() {
+  if (!audioCtx) return;
+  for (let i = 0; i < 3; i++) {
+    const t = audioCtx.currentTime + i * 0.22;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(100, t);
+    osc.frequency.exponentialRampToValueAtTime(30, t + 0.1);
+    gain.gain.setValueAtTime(0.8, t);
+    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(t);
+    osc.stop(t + 0.1);
+  }
+}
+
+function playScratchSound() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "square";
+  osc.frequency.setValueAtTime(1200, now);
+  osc.frequency.linearRampToValueAtTime(3500, now + 0.4);
+  gain.gain.setValueAtTime(0.3, now);
+  gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(now);
+  osc.stop(now + 0.5);
+}
+
+function playHeartbeatSound() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  [0, 0.18].forEach(delay => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(65, now + delay);
+    osc.frequency.exponentialRampToValueAtTime(25, now + delay + 0.12);
+    gain.gain.setValueAtTime(0.9, now + delay);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.12);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(now + delay);
+    osc.stop(now + delay + 0.12);
+  });
+}
+
+function playTinnitusSound() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(4200, now);
+  gain.gain.setValueAtTime(0.01, now);
+  gain.gain.linearRampToValueAtTime(0.25, now + 0.5);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(now);
+  osc.stop(now + 1.8);
+}
+
+function playWhisperSound() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const bufferSize = audioCtx.sampleRate * 1.5;
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = buffer;
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = "bandpass";
+  filter.frequency.setValueAtTime(400, now);
+  filter.frequency.linearRampToValueAtTime(800, now + 0.8);
+  filter.Q.value = 4.0;
+
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(0.01, now);
+  gain.gain.linearRampToValueAtTime(0.4, now + 0.5);
+  gain.gain.exponentialRampToValueAtTime(0.01, now + 1.5);
+
+  noise.connect(filter);
+  filter.connect(gain);
+  gain.connect(audioCtx.destination);
+  noise.start(now);
+}
+
+// ==================== 破框全屏 Canvas 绘制矩阵 ====================
+function getCanvasCtx() {
+  const canvas = document.getElementById("fullscreen-canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  return { canvas, ctx, cx: canvas.width / 2, cy: canvas.height / 2 };
+}
+
+// 1. 全屏静止黏稠渗血（破框占满整个屏幕）
+function drawBloodOozing() {
+  const { canvas, ctx } = getCanvasCtx();
+  ctx.fillStyle = "rgba(8, 0, 0, 0.94)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#800000";
+  ctx.fillRect(0, 0, canvas.width, 40);
+
+  // 满屏垂流血痕
+  for (let x = 0; x < canvas.width; x += 18) {
+    const len = 80 + Math.sin(x) * 40 + Math.random() * (canvas.height * 0.7);
+    const width = 8 + Math.random() * 12;
+    ctx.fillStyle = Math.random() > 0.3 ? "#8b0000" : "#ff0000";
+    ctx.fillRect(x, 0, width, len);
+
+    ctx.beginPath();
+    ctx.arc(x + width / 2, len, width * 0.9, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 溅洒在大屏各处的血斑
+  for (let i = 0; i < 35; i++) {
+    ctx.fillStyle = "rgba(140, 0, 0, 0.85)";
+    ctx.beginPath();
+    ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, 20 + Math.random() * 45, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// 2. 密密麻麻全屏文字吞噬
+function drawDenseTextFlood() {
+  const { canvas, ctx } = getCanvasCtx();
+  ctx.fillStyle = "#030000";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const texts = ["他在你背后", "回头", "死", "别看他", "他在看着你", "逃不掉了", "抓到你了", "别眨眼", "床底有人", "嘻嘻嘻"];
+  
+  ctx.font = "bold 16px monospace";
+  for (let y = 20; y < canvas.height; y += 24) {
+    for (let x = 0; x < canvas.width; x += 105) {
+      ctx.fillStyle = Math.random() > 0.4 ? "#ff1a1a" : (Math.random() > 0.5 ? "#8b0000" : "#ffffff");
+      const word = texts[Math.floor(Math.random() * texts.length)];
+      ctx.fillText(word, x + (Math.random() * 8 - 4), y);
+    }
+  }
+
+  // 全屏中心突出的巨大狂暴文字
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "900 clamp(32px, 6vw, 64px) monospace";
+  ctx.textAlign = "center";
+  ctx.shadowColor = "#ff0000";
+  ctx.shadowBlur = 25;
+  ctx.fillText("【 他 正 趴 在 你 头 顶 】", canvas.width / 2, canvas.height / 2);
+}
+
+// 3. 密密麻麻挤压变形扭曲面孔矩阵（全屏平铺）
+function drawDenseDistortedFaces() {
+  const { canvas, ctx } = getCanvasCtx();
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const rows = Math.ceil(canvas.height / 140);
+  const cols = Math.ceil(canvas.width / 160);
+  const cellW = canvas.width / cols;
+  const cellH = canvas.height / rows;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const fx = c * cellW + cellW / 2 + (Math.random() * 20 - 10);
+      const fy = r * cellH + cellH / 2 + (Math.random() * 20 - 10);
+      const scaleX = 0.7 + Math.random() * 0.5;
+      const scaleY = 1.1 + Math.random() * 0.7;
+
+      ctx.save();
+      ctx.translate(fx, fy);
+      ctx.scale(scaleX, scaleY);
+
+      // 挤压灰白脸
+      ctx.fillStyle = Math.random() > 0.5 ? "#b5b5b5" : "#6c7a70";
+      ctx.beginPath();
+      ctx.ellipse(0, 0, cellW * 0.38, cellH * 0.42, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 空洞黑眼
+      ctx.fillStyle = "#000";
+      ctx.beginPath();
+      ctx.ellipse(-16, -12, 10, 16, 0.1, 0, Math.PI * 2);
+      ctx.ellipse(16, -12, 10, 16, -0.1, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 猩红凝视点
+      ctx.fillStyle = "#ff0000";
+      ctx.beginPath();
+      ctx.arc(-16, -12, 3, 0, Math.PI * 2);
+      ctx.arc(16, -12, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 撕裂下垂大嘴
+      ctx.fillStyle = "#050000";
+      ctx.beginPath();
+      ctx.ellipse(0, 24, 14, 30, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 淌血
+      ctx.fillStyle = "#990000";
+      ctx.fillRect(-18, -4, 4, 35);
+      ctx.fillRect(14, -4, 4, 35);
+
+      ctx.restore();
+    }
+  }
+}
+
+// 4. 蜡质融化下垂巨口鬼脸（全屏占满）
+function drawMeltingFace() {
+  const { canvas, ctx, cx, cy } = getCanvasCtx();
+  ctx.fillStyle = "#040404";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const faceW = Math.min(canvas.width * 0.4, 300);
+  const faceH = Math.min(canvas.height * 0.5, 400);
+
+  ctx.fillStyle = "#d0c8b0";
+  ctx.beginPath();
+  ctx.moveTo(cx - faceW, cy - faceH * 0.8);
+  ctx.bezierCurveTo(cx - faceW * 1.3, cy + faceH * 0.2, cx - faceW * 0.6, cy + faceH, cx, cy + faceH * 1.2);
+  ctx.bezierCurveTo(cx + faceW * 0.6, cy + faceH, cx + faceW * 1.3, cy + faceH * 0.2, cx + faceW, cy - faceH * 0.8);
+  ctx.closePath();
+  ctx.fill();
+
+  // 下垂肉条
+  for (let i = -faceW * 0.8; i <= faceW * 0.8; i += 30) {
+    ctx.fillRect(cx + i, cy + faceH * 0.7, 18, 80 + Math.random() * 100);
+  }
+
+  // 倾斜融化黑洞眼
+  ctx.fillStyle = "#000";
+  ctx.beginPath();
+  ctx.ellipse(cx - faceW * 0.4, cy - faceH * 0.2, 55, 80, 0.3, 0, Math.PI * 2);
+  ctx.ellipse(cx + faceW * 0.4, cy - faceH * 0.1, 45, 90, -0.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 融化巨口
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + faceH * 0.4, 65, 140, 0, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// 5. 全屏极密纯红诅咒血字
+function drawDenseTextRed() {
+  const { canvas, ctx } = getCanvasCtx();
+  ctx.fillStyle = "#3d0000";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.font = "900 20px monospace";
+  for (let y = 24; y < canvas.height; y += 22) {
+    for (let x = 0; x < canvas.width; x += 120) {
+      ctx.fillStyle = Math.random() > 0.5 ? "#ff0000" : "#000000";
+      ctx.fillText("死死死死死死", x, y);
+    }
+  }
+}
+
+// 6. 全屏充血红眼凝视
+function drawEyesJumpscare() {
+  const { canvas, ctx, cx, cy } = getCanvasCtx();
+  ctx.fillStyle = "rgba(0, 0, 0, 0.96)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const eyeDist = Math.min(canvas.width * 0.22, 220);
+
+  for (let i = -1; i <= 1; i += 2) {
+    const ex = cx + i * eyeDist;
+    const ey = cy;
+    ctx.fillStyle = "#ffdddd";
+    ctx.beginPath();
+    ctx.ellipse(ex, ey, 130, 75, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = "#aa0000";
+    ctx.lineWidth = 3.5;
+    for (let s = 0; s < 16; s++) {
+      ctx.beginPath();
+      ctx.moveTo(ex + (Math.random() - 0.5) * 50, ey + (Math.random() - 0.5) * 25);
+      ctx.lineTo(ex + (Math.random() - 0.5) * 220, ey + (Math.random() - 0.5) * 110);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = "#ff0000";
+    ctx.beginPath();
+    ctx.arc(ex, ey, 34, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#000";
+    ctx.beginPath();
+    ctx.arc(ex, ey, 14, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// 7. 全屏拍击血手印（第18题）
+function drawHandsJumpscare() {
+  const { canvas, ctx } = getCanvasCtx();
+  ctx.fillStyle = "rgba(10, 0, 0, 0.92)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  function drawHand(hx, hy, scale) {
+    ctx.fillStyle = "rgba(220, 0, 0, 0.94)";
+    ctx.beginPath();
+    ctx.arc(hx, hy, 55 * scale, 0, Math.PI * 2);
+    ctx.fill();
+    for (let f = -2; f <= 2; f++) {
+      ctx.beginPath();
+      ctx.ellipse(hx + f * 24 * scale, hy - 65 * scale, 14 * scale, 42 * scale, f * 0.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillRect(hx + f * 24 * scale - 5, hy + 25, 10 * scale, 80 * scale);
+    }
+  }
+
+  drawHand(canvas.width * 0.22, canvas.height * 0.45, 1.4);
+  drawHand(canvas.width * 0.78, canvas.height * 0.4, 1.5);
+  drawHand(canvas.width * 0.5, canvas.height * 0.65, 1.8);
+}
+
+// 8. 全屏深渊裂嘴诡笑
+function drawSmileJumpscare() {
+  const { canvas, ctx, cx, cy } = getCanvasCtx();
+  ctx.fillStyle = "#020202";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const eyeDist = Math.min(canvas.width * 0.18, 160);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(cx - eyeDist, cy - 80, 24, 0, Math.PI * 2);
+  ctx.arc(cx + eyeDist, cy - 80, 24, 0, Math.PI * 2);
+  ctx.fill();
+
+  const mouthRadius = Math.min(canvas.width * 0.28, 240);
+  ctx.strokeStyle = "#990000";
+  ctx.lineWidth = 18;
+  ctx.beginPath();
+  ctx.arc(cx, cy + 20, mouthRadius, 0.15 * Math.PI, 0.85 * Math.PI, false);
+  ctx.stroke();
+
+  ctx.fillStyle = "#fff";
+  for (let x = -mouthRadius * 0.75; x <= mouthRadius * 0.75; x += 28) {
+    ctx.beginPath();
+    ctx.moveTo(cx + x, cy + 120);
+    ctx.lineTo(cx + x + 10, cy + 170);
+    ctx.lineTo(cx + x + 20, cy + 120);
+    ctx.fill();
+  }
+}
+
+// 9. 全屏信号中断黑屏失真
+function drawSignalLostJumpscare() {
+  const { canvas, ctx, cx, cy } = getCanvasCtx();
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#ff0000";
+  ctx.font = "bold clamp(24px, 4vw, 42px) monospace";
+  ctx.textAlign = "center";
+  ctx.fillText("--- [ FATAL: HOST SUBJECT DETECTED ] ---", cx, cy - 20);
+  ctx.font = "clamp(16px, 2.5vw, 24px) monospace";
+  ctx.fillText("IT IS STANDING RIGHT BEHIND YOUR BACK", cx, cy + 40);
+
+  for (let i = 0; i < 900; i++) {
+    ctx.fillStyle = Math.random() > 0.5 ? "#fff" : "#f00";
+    ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 4, 4);
+  }
+}
+
+// 10. 终极全屏血泪鬼脸与双手抓屏（第40题大高潮）
+function drawBleedingTearsFace() {
+  const { canvas, ctx, cx, cy } = getCanvasCtx();
+  ctx.fillStyle = "rgba(0, 0, 0, 0.96)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const faceW = Math.min(canvas.width * 0.28, 220);
+  const faceH = Math.min(canvas.height * 0.45, 300);
+
+  ctx.fillStyle = "#cfcfcf";
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, faceW, faceH, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "#080000";
+  ctx.beginPath();
+  ctx.ellipse(cx - faceW * 0.38, cy - faceH * 0.18, faceW * 0.24, faceH * 0.24, 0.1, 0, Math.PI * 2);
+  ctx.ellipse(cx + faceW * 0.38, cy - faceH * 0.18, faceW * 0.24, faceH * 0.24, -0.1, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 狂暴血泪
+  ctx.fillStyle = "#aa0000";
+  for(let offset of [-faceW * 0.38, faceW * 0.38]) {
+    for (let i = 0; i < 10; i++) {
+      ctx.beginPath();
+      let startX = cx + offset + (i - 5) * 11;
+      let startY = cy - faceH * 0.05;
+      let length = faceH * 0.6 + Math.random() * 120;
+      ctx.rect(startX, startY, 5 + Math.random() * 5, length);
+      ctx.fill();
+    }
+  }
+
+  // 撕裂巨口
+  ctx.fillStyle = "#150000";
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + faceH * 0.45, faceW * 0.36, faceH * 0.38, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 两侧大血手印
+  function drawHand(hx, hy) {
+    ctx.fillStyle = "rgba(200, 0, 0, 0.92)";
+    ctx.beginPath(); ctx.arc(hx, hy, 55, 0, Math.PI * 2); ctx.fill();
+    for (let f = -2; f <= 2; f++) {
+      ctx.beginPath();
+      ctx.ellipse(hx + f * 24, hy - 65, 14, 42, f * 0.15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillRect(hx + f * 24 - 5, hy + 25, 10, 70);
+    }
+  }
+  drawHand(cx - faceW * 1.5, cy);
+  drawHand(cx + faceW * 1.5, cy);
+}
+
+// ==================== 流程驱动与渲染 ====================
+function startGame() {
+  document.getElementById("disclaimer-modal").style.display = "none";
+  initAudio();
+  renderQuestion();
+  setInterval(updateLiveTime, 1000);
+}
+
+function updateLiveTime() {
+  const d = new Date();
+  document.getElementById("live-time").innerText = 
+    `0${d.getHours()}`.slice(-2) + ":" + 
+    `0${d.getMinutes()}`.slice(-2) + ":" + 
+    `0${d.getSeconds()}`.slice(-2) + " AM";
+}
+
+function renderQuestion() {
+  const qData = QUESTIONS[currentIdx];
+  const qIdxElem = document.getElementById("q-idx");
+  const qTextElem = document.getElementById("q-text");
+  const qOpsElem = document.getElementById("q-options");
+
+  qIdxElem.innerText = `QUESTION ${currentIdx + 1 < 10 ? '0' + (currentIdx + 1) : (currentIdx + 1)} / 44`;
+  
+  if (currentIdx > 20) {
+    document.getElementById("monitor").style.borderColor = "#4a0000";
+    document.getElementById("status-light").style.background = "#ff0000";
+  }
+
+  qTextElem.innerHTML = "";
+  let charIdx = 0;
+  const text = qData.q;
+  const timer = setInterval(() => {
+    qTextElem.innerHTML += text[charIdx];
+    charIdx++;
+    if (charIdx >= text.length) clearInterval(timer);
+  }, 22);
+
+  qOpsElem.innerHTML = "";
+  qData.ops.forEach((optText) => {
+    const btn = document.createElement("button");
+    btn.className = "btn-choice";
+    btn.innerText = `[ > ] ${optText}`;
+    btn.onclick = () => handleChoice(qData);
+    qOpsElem.appendChild(btn);
+  });
+}
+
+// 破框全屏跳杀触发器（仅在必要时开启震动）
+function triggerFullscreenJumpscare(drawFunction, duration = 1000, hasViolentShock = false, hasScreamer = false) {
+  const canvas = document.getElementById("fullscreen-canvas");
+  drawFunction();
+  canvas.style.display = "block";
+
+  if (hasViolentShock) {
+    document.body.classList.add("violent-shock");
+  }
+
+  if (hasScreamer) {
+    playScreamerAudio(duration / 1000, 1.2);
+  } else {
+    playCreepyDrone(duration / 1000);
+  }
+
+  setTimeout(() => {
+    canvas.style.display = "none";
+    if (hasViolentShock) document.body.classList.remove("violent-shock");
+    currentIdx++;
+    renderQuestion();
+  }, duration);
+}
+
+function handleChoice(qData) {
+  playClickSound();
+
+  // 基础伴随音效
+  if (qData.sfx === "whisper") playWhisperSound();
+  if (qData.sfx === "heartbeat") playHeartbeatSound();
+  if (qData.sfx === "knock") playKnockSound();
+  if (qData.sfx === "scratch") playScratchSound();
+  if (qData.sfx === "tinnitus") playTinnitusSound();
+
+  // 破框全屏跳杀分发（精心分配震动与尖叫，避免脱敏）
+  if (qData.jumpscareType === "blood_ooze") {
+    // 静止黏稠渗血（无震动，低频音）
+    triggerFullscreenJumpscare(drawBloodOozing, 1000, false, false);
+    return;
+  }
+  if (qData.jumpscareType === "eyes") {
+    // 凝视红眼（刺耳尖啸，无乱震）
+    triggerFullscreenJumpscare(drawEyesJumpscare, 900, false, true);
+    return;
+  }
+  if (qData.jumpscareType === "dense_text") {
+    // 密密麻麻文字（静默心理压迫，无震动）
+    triggerFullscreenJumpscare(drawDenseTextFlood, 1100, false, false);
+    return;
+  }
+  if (qData.jumpscareType === "hands_violent") {
+    // 💥 关键突发点：血手印拍屏（暴烈震动 + 尖啸）
+    triggerFullscreenJumpscare(drawHandsJumpscare, 950, true, true);
+    return;
+  }
+  if (qData.jumpscareType === "dense_faces") {
+    // 密集怪脸矩阵（全屏静止凝视，无震动）
+    triggerFullscreenJumpscare(drawDenseDistortedFaces, 1200, false, false);
+    return;
+  }
+  if (qData.jumpscareType === "melting_face") {
+    // 蜡质融化鬼脸（深层心理不适，无震动）
+    triggerFullscreenJumpscare(drawMeltingFace, 1100, false, false);
+    return;
+  }
+  if (qData.jumpscareType === "smile") {
+    // 裂嘴诡笑（静默突现）
+    triggerFullscreenJumpscare(drawSmileJumpscare, 1000, false, false);
+    return;
+  }
+  if (qData.jumpscareType === "dense_text_red") {
+    // 密集红字（无震动）
+    triggerFullscreenJumpscare(drawDenseTextRed, 900, false, false);
+    return;
+  }
+  if (qData.jumpscareType === "signallost") {
+    // 信号中断（电声尖啸）
+    triggerFullscreenJumpscare(drawSignalLostJumpscare, 1200, false, true);
+    return;
+  }
+  if (qData.jumpscareType === "look_behind") {
+    // 💥💥 终极高潮：第40题全景回头 + 满脸血泪鬼脸大跳杀！
+    executeBehindYouJumpscare();
+    return;
+  }
+
+  currentIdx++;
+  if (currentIdx < QUESTIONS.length) {
+    renderQuestion();
+  } else {
+    document.querySelector(".quiz-container").innerHTML = `
+      <div style="text-align:center; padding-top:80px; color: var(--neon-red);">
+        <h1 style="font-size:30px; letter-spacing:4px; margin-bottom:20px;">[ 44 道检测完成 · 它已经钻进被窝了 ]</h1>
+        <p style="font-size:16px; color:#888;">今晚请千万不要回头看。</p>
+      </div>
+    `;
+  }
+}
+
+// 第 40 题：破框全屏全景回头 + 终极大跳杀
+function executeBehindYouJumpscare() {
+  const panView = document.getElementById("fullscreen-pan-view");
+  const panorama = document.getElementById("panorama");
+  const canvas = document.getElementById("fullscreen-canvas");
+
+  panView.style.display = "block";
+  panorama.style.transform = "translateX(25vw)"; // 缓缓向左看
+
+  setTimeout(() => {
+    panorama.style.transform = "translateX(-25vw)"; // 缓缓向右看
+  }, 900);
+
+  setTimeout(() => {
+    panorama.style.transform = "translateX(0vw)"; // 猛地转回正后方！
+  }, 1800);
+
+  setTimeout(() => {
+    // 💥 全场最强爆发：满屏血泪鬼脸 + 全屏剧烈暴颤 + 极度尖啸！
+    drawBleedingTearsFace();
+    canvas.style.display = "block";
+    document.body.classList.add("violent-shock");
+    playScreamerAudio(1.7, 1.4);
+
+    setTimeout(() => {
+      canvas.style.display = "none";
+      panView.style.display = "none";
+      document.body.classList.remove("violent-shock");
+      currentIdx++;
+      renderQuestion();
+    }, 1700);
+  }, 2400);
+}
+</script>
+</body>
+</html>
